@@ -7,7 +7,7 @@ This repo includes:
 
 ## Usage and development
 
-- **To code**, please use a virtual environment (requires [virtualenv](https://virtualenv.pypa.io/en/latest/):
+- **To code**, please use a virtual environment (requires [virtualenv](https://virtualenv.pypa.io/en/latest/)):
 
 ```bash
 virtualenv .venv
