@@ -43,44 +43,55 @@ class Label:
     information since its flow from each source.
     """
 
-    def __init__(self, sources=[], sanitizers=[]):
+    def __init__(self,
+                 contents: dict[str, list[str]] = {},
+                 sources: list[str] = []):
+        # Maps sanitizers to sources it was applied to
+        self.contents = contents
         self.sources = sources
-        self.sanitizers = sanitizers
-
-        # FIXME: might be missing something that saves order in which things
-        # happened (where tainted source came before or after sanitizer)
 
     def add_source(self, source: str):
         self.sources.append(source)
 
     def add_sources(self, sources: list[str]):
-        self.sources += sources
+        for s in sources:
+            self.add_source(source)
 
     def add_sanitizer(self, sanitizer: str):
-        self.sanitizers.append(sanitizer)
+        # Sanitizer sanitizes all existing sources
+        self.contents[sanitizer] = self.sources.copy()
 
     def add_sanitizers(self, sanitizers: list[str]):
-        self.sanitizers += sanitizers
+        for s in sanitizers:
+            self.add_sanitizer(s)
 
     def get_sources(self) -> list[str]:
         return self.sources
 
     def get_sanitizers(self) -> list[str]:
-        return self.sanitizers
+        return list(self.contents.keys())
 
     def __add__(self, other: Self) -> Self:
         return self.combine(other)
 
     def combine(self, other: Self) -> Self:
-        return Label(
-            self.get_sources().copy() + other.get_sources.copy(),
-            self.get_sanitizers().copy() + other.get_sanitizers().copy())
+        # Concatenate contents (creating copies of the lists)
+        c = {}
+        for s in self.contents:
+            c[s] = self.contents[s].copy()
+
+        for s in other.contents:
+            if s not in c: c[s] = []
+            c[s] += other.contents[s].copy()
+
+        return Label(c, self.get_sources().copy() + other.get_sources.copy())
 
 
 class Multilabel:
     """
     Generalizes the `Label` class in order to be able to represent distinct
-    labels corresponding to different patterns.
+    labels corresponding to different patterns. Represents the product of 
+    different label policies (i.e. a vector of labels)
     """
 
     def __init__(self, labels=[]):
@@ -92,4 +103,16 @@ class Multilabel:
     # FIXME: probably add more selectors
 
     def combine(self, other: Multilabel) -> Multilabel:
-        return Multilabel(self.get_labels().copy() + other.get_labels().copy())
+        """
+        Point wise combination of multilabels - requires multilabels to be 
+        compatible (i.e. to be vector of labels of the same size)
+        """
+
+        if len(self.labels) != len(other.labels):
+            raise ValueError(
+                "Multilabel.combine: can't combine incompatible multilabels")
+
+        return Multilabel([
+            self.labels[i].combine(other.labels[i])
+            for i in range(len(self.labels))
+        ])
