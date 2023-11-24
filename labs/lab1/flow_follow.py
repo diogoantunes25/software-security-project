@@ -100,8 +100,6 @@ class Multilabel:
     def get_labels(self):
         return self.labels
 
-    # FIXME: probably add more selectors
-
     def combine(self, other: Multilabel) -> Multilabel:
         """
         Point wise combination of multilabels - requires multilabels to be 
