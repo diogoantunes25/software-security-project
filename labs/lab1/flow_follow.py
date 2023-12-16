@@ -10,8 +10,8 @@ class Pattern:
                  sinks: list[str]):
         self.name = name
         self.sources = sources
-        self.sanitizers = sources
-        self.sinks = sources
+        self.sanitizers = sanitizers
+        self.sinks = sinks
 
     def __repr__(self) -> str:
         return f"Pattern[{name}] {{ sources={sources}, sanitizers={sanitizers}, sinks={sinks} }}"
