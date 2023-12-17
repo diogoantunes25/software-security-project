@@ -1,14 +1,15 @@
 import ast, sys, argparse
 import PrintVisitor as pv
+import CFGVisitor as cfgv
 
 
 def ast_parse(filename: str):
     with open(filename, 'r') as fh:
         source = fh.read()
         tree = ast.parse(source)
-        # print(ast.dump(tree, indent=4))
+        print(ast.dump(tree, indent=4))
 
-        vis = pv.PrintVisitor()
+        vis = cfgv.CFGVisitor()
         vis.visit(tree)
 
 
