@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging
 
 
 class Pattern:
@@ -152,10 +153,10 @@ class MultiLabel:
              for name in self.labels})
 
     def __repr__(self) -> str:
-        s = f"MultiLabel {{\n"
+        s = f"MultiLabel {{ "
         for lbl in self.labels.values():
-            s += f"\t{str(lbl)},\n"
-        s += f"}}\n"
+            s += f"{str(lbl)}, "
+        s += f" }}"
         return s
 
 
@@ -284,10 +285,10 @@ class MultiLabelling:
         return combination
 
     def __repr__(self) -> str:
-        s = f"MultiLabelling {{\n"
+        s = f"MultiLabelling {{ "
         for var in self.mapping:
-            s += f"\t{var}: {str(self.mapping[var])},\n"
-        s += f"}}\n"
+            s += f"{var}: {str(self.mapping[var])}, "
+        s += f" }}"
         return s
 
 

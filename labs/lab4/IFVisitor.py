@@ -1,5 +1,6 @@
 import ast
 from flow_follow import *
+import logging
 
 WHILE_COUNT = 50
 
@@ -60,13 +61,12 @@ class IFVisitor():
                      mtlb: MultiLabelling,
                      vulns: Vulnerability) -> MultiLabelling:
         mlb = self.visit(node.value, policy, mtlb, vulns)
-        print(type(mtlb))
         new = mtlb.clone()
 
         for target in node.targets:
             new.mlabel_set(target.id, mlb)
 
-        print(f"Multilabelling after assign is {str(new)}")
+        logging.debug(f"Multilabelling after assign is {str(new)}")
 
         return new
 
@@ -104,18 +104,18 @@ class IFVisitor():
         mlb = MultiLabel({})
         for arg in node.args:
             argmlb = self.visit(arg, policy, mtlb, vulns)
-            print(
-                f"Argument for {name} has the following multilabel:\n{str(argmlb)}"
+            logging.debug(
+                f"Argument for {name} has the following multilabel: {str(argmlb)}"
             )
             mlb = mlb.combine(argmlb)
 
-        print(f"Call for {name} has initial multilabel of {str(mlb)}")
+        logging.debug(f"Call for {name} has initial multilabel of {str(mlb)}")
 
         # Patterns for which name is a source - add new source to that label
         sources = policy.search_source(name)
         sources = list(map(lambda n: policy.get_vulnerability(n), sources))
         for pattern in sources:
-            print(f"{name} is a source for {str(pattern)}")
+            logging.debug(f"{name} is a source for {str(pattern)}")
             lbl = mlb.get_label(pattern.name)
             lbl.add_source(name)
 
@@ -124,17 +124,17 @@ class IFVisitor():
         sanitizers = list(
             map(lambda n: policy.get_vulnerability(n), sanitizers))
         for pattern in sanitizers:
-            print(f"{name} is a sanitizer for {str(pattern)}")
+            logging.debug(f"{name} is a sanitizer for {str(pattern)}")
             lbl = mlb.get_label(pattern.name)
             lbl.add_sanitizer(name)
 
         # Patterns for which name is a sink - check is there's any violation
         bad_labels = policy.find_illegal(name, mlb)
-        print(
+        logging.debug(
             f"Saving the following vulnerabilities for {name} - {bad_labels}")
         vulns.save(name, bad_labels)
 
-        print(f"Call for {name} has final multilabel of {str(mlb)}")
+        logging.debug(f"Call for {name} has final multilabel of {str(mlb)}")
         return mlb
 
     def visit_while(self, node: ast.While, policy: Policy,
