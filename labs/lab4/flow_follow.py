@@ -277,10 +277,10 @@ class MultiLabelling:
         combination = self.clone()
         for variable in other.mapping:
             if variable not in combination.mapping:
-                combination.mapping[variable] = []
+                combination.mapping[variable] = MultiLabel({})
 
-            for ml in other.mapping[variable]:
-                combination.mapping[variable].append(ml.clone())
+            combination.mapping[variable].combine(
+                other.mapping[variable].clone())
 
         return combination
 
