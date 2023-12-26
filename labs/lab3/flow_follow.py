@@ -200,25 +200,28 @@ class Policy:
 
 class MultiLabelling:
     """
-    Mapping from variable names to multilabels
+    Mapping from variable names to list of multilabels
     """
 
-    def __init_(self, mapping: dict[str, Multilabel] = {}):
+    def __init_(self, mapping: dict[str, list[Multilabel]] = {}):
         this.mapping = mapping
 
-    def mlabel_of(self, variable: str) -> Multilabel:
+    def mlabel_of(self, variable: str) -> list[Multilabel]:
         """
         Returnsn multilabel assigned to a given name
         """
         if variable in mapping:
             return mapping[variable]
-        return None
+        return []
 
-    def mlabel_set(self, variable: str, ml: Multilable):
+    def mlabel_add(self, variable: str, ml: Multilable):
         """
-        Updates multilabel assigned to a given name
+        ADd multilabel assigned to a given name
         """
-        mapping[variable] = ml
+        if variable not in mapping:
+            mapping[variable] = []
+
+        mapping[variable].append(ml)
 
     def clone(self) -> MultiLabelling:
         """
@@ -237,7 +240,15 @@ class MultiLabelling:
         hold.
         """
 
-        pass
+        combination = self.clone()
+        for variable in other.mapping:
+            if variable not in combination.mapping:
+                combination.mapping[variable] = []
+
+            for ml in other.mapping[variable]:
+                combination.mapping[variable].append(ml.clone())
+
+        return combination
 
 
 class Vulnerability:
