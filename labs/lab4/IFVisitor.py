@@ -2,7 +2,7 @@ import ast
 from flow_follow import *
 import logging
 
-WHILE_COUNT = 50
+WHILE_COUNT = 2
 
 
 class IFVisitor():
@@ -105,9 +105,12 @@ class IFVisitor():
                       mtlb: MultiLabelling,
                       vulns: Vulnerability) -> MultiLabel:
 
-        # TODO
+        new: MultiLabel = self.visit(node.left, policy, mtlb, vulns)
 
-        return MultiLabel({})
+        for val in node.comparators:
+            new = self.visit(val, policy, mtlb, vulns)
+
+        return new
 
     def visit_expr(self, node: ast.Expr, policy: Policy, mtlb: MultiLabelling,
                    vulns: Vulnerability) -> MultiLabel:
@@ -158,10 +161,27 @@ class IFVisitor():
                     mtlb: MultiLabelling,
                     vulns: Vulnerability) -> MultiLabelling:
 
-        # TODO
+        condmlb = self.visit(node.test, policy, mtlb, vulns)
+        self.contexts.append(condmlb.clone())
 
-        self.visit(node.test, policy, mtlb, vulns)
-
+        aggregate_cond_mlb = condmlb
         for _ in range(WHILE_COUNT):
-            self.visit(node.body, policy, mtlb, vulns)
-            self.visit(node.test, policy, mtlb, vulns)
+
+            taken = self.visit_multiple(node.body, policy, mtlb, vulns)
+            not_taken = mtlb
+            # TODO: handle orelse (a bit akward in while context)
+
+            mtlb = taken.combine(not_taken)
+
+            condmlb = self.visit(node.test, policy, mtlb, vulns)
+            aggregate_cond_mlb = aggregate_cond_mlb.combine(condmlb)
+            self.contexts.append(condmlb.clone())
+
+        for _ in range(WHILE_COUNT + 1):
+            self.contexts.pop()
+
+        # leave as context the aggregate multilabel (encodes all possible values
+        # that were in the condition)
+        self.contexts.append(aggregate_cond_mlb)
+
+        return mtlb
