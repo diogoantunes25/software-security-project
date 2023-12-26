@@ -230,25 +230,31 @@ class MultiLabelling:
     Mapping from variable names to list of multilabels
     """
 
-    def __init_(self, mapping: dict[str, MultiLabel] = {}):
+    def __init__(self, mapping: dict[str, MultiLabel]):
         self.mapping = mapping
 
     def mlabel_of(self, variable: str) -> MultiLabel:
         """
         Returnsn multilabel assigned to a given name
         """
-        if variable in mapping:
-            return mapping[variable]
+        if variable in self.mapping:
+            return self.mapping[variable]
         return None
 
-    def mlabel_add(self, variable: str, ml: Multilable):
+    def mlabel_set(self, variable: str, ml: Multilabel):
+        """
+        Set multilabel of given name to provided value
+        """
+        self.mapping[variable] = ml
+
+    def mlabel_add(self, variable: str, ml: Multilabel):
         """
         Add multilabel assigned to a given name
         """
         if variable not in mapping:
-            mapping[variable] = MultiLabel()
+            self.mapping[variable] = MultiLabel()
 
-        mapping[variable].combine(ml)
+        self.mapping[variable].combine(ml)
 
     def clone(self) -> MultiLabelling:
         """
@@ -256,8 +262,8 @@ class MultiLabelling:
         """
 
         return MultiLabelling({
-            variable: [ml.clone() for ml in self.mapping[variable]]
-            for variable in this.mapping
+            variable: self.mapping[variable].clone()
+            for variable in self.mapping
         })
 
     def combine(self, other: Self) -> Self:
@@ -276,6 +282,13 @@ class MultiLabelling:
                 combination.mapping[variable].append(ml.clone())
 
         return combination
+
+    def __repr__(self) -> str:
+        s = f"MultiLabelling {{\n"
+        for var in self.mapping:
+            s += f"\t{var}: {str(self.mapping[var])},\n"
+        s += f"}}\n"
+        return s
 
 
 class Vulnerability:

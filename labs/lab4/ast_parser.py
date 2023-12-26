@@ -12,7 +12,7 @@ def ast_parse(filename: str):
         pattern = Pattern("dsa_pat", ["s1", "s2"], ["san"], ["b1", "b2", "b3"],
                           False)
         policy = Policy([pattern])
-        mtlb = MultiLabelling
+        mtlb = MultiLabelling({})
         vulns = Vulnerability()
 
         vis = ifv.IFVisitor()

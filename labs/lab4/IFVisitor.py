@@ -44,17 +44,31 @@ class IFVisitor():
 
     def visit_multiple(self, nodes: list[ast.AST], policy: Policy,
                        mtlb: MultiLabelling,
-                       vulns: Vulnerability) -> MultiLabel:
+                       vulns: Vulnerability) -> MultiLabelling:
+
         for stmt in nodes:
-            self.visit(stmt, policy, mtlb, vulns)
+            mtlb = self.visit(stmt, policy, mtlb, vulns)
+
+        return mtlb
 
     def visit_module(self, node: ast.Module, policy: Policy,
-                     mtlb: MultiLabelling, vulns: Vulnerability) -> MultiLabel:
+                     mtlb: MultiLabelling,
+                     vulns: Vulnerability) -> MultiLabelling:
         return self.visit_multiple(node.body, policy, mtlb, vulns)
 
     def visit_assign(self, node: ast.Assign, policy: Policy,
-                     mtlb: MultiLabelling, vulns: Vulnerability) -> MultiLabel:
-        return MultiLabel()
+                     mtlb: MultiLabelling,
+                     vulns: Vulnerability) -> MultiLabelling:
+        mlb = self.visit(node.value, policy, mtlb, vulns)
+        print(type(mtlb))
+        new = mtlb.clone()
+
+        for target in node.targets:
+            new.mlabel_set(target.id, mlb)
+
+        print(f"Multilabelling after assign is {str(new)}")
+
+        return new
 
     def visit_constant(self, node: ast.Constant, policy: Policy,
                        mtlb: MultiLabelling,
@@ -66,8 +80,7 @@ class IFVisitor():
         return mtlb.mlabel_of(node.id)
 
     def visit_if(self, node: ast.If, policy: Policy, mtlb: MultiLabelling,
-                 vulns: Vulnerability) -> MultiLabel:
-        self.visit(node.test, policy, mtlb, vulns)
+                 vulns: Vulnerability) -> MultiLabelling:
 
         self.visit_multiple(node.body, policy, mtlb, vulns)
 
@@ -125,7 +138,8 @@ class IFVisitor():
         return mlb
 
     def visit_while(self, node: ast.While, policy: Policy,
-                    mtlb: MultiLabelling, vulns: Vulnerability) -> MultiLabel:
+                    mtlb: MultiLabelling,
+                    vulns: Vulnerability) -> MultiLabelling:
 
         self.visit(node.test, policy, mtlb, vulns)
 
