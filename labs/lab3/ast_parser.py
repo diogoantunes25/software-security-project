@@ -1,6 +1,7 @@
 import ast, sys, argparse
 import PrintVisitor as pv
 import CFGVisitor as cfgv
+import TraceVisitor as tv
 
 
 def ast_parse(filename: str):
@@ -9,8 +10,10 @@ def ast_parse(filename: str):
         tree = ast.parse(source)
         print(ast.dump(tree, indent=4))
 
-        vis = cfgv.CFGVisitor()
-        vis.visit(tree)
+        # vis = cfgv.CFGVisitor()
+        vis = tv.TraceVisitor()
+        paths = vis.visit(tree, [[]])
+        print(f"found {len(paths)} paths")
 
 
 if __name__ == "__main__":
