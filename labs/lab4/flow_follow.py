@@ -110,7 +110,7 @@ class MultiLabel:
     different label policies (i.e. a vector of labels)
     """
 
-    def __init__(self, labels={}):
+    def __init__(self, labels):
         # Maps pattern name to labels
         assert (type(labels) == dict)
         self.labels = labels

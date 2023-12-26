@@ -11,6 +11,7 @@ def ast_parse(filename: str):
     with open(filename, 'r') as fh:
         source = fh.read()
         tree = ast.parse(source)
+        print(ast.dump(tree, indent=4))
 
         pattern = Pattern("dsa_pat", ["s1", "s2"], ["san"], ["b1", "b2", "b3"],
                           False)

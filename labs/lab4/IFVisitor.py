@@ -8,7 +8,11 @@ WHILE_COUNT = 50
 class IFVisitor():
 
     def __init__(self):
-        pass
+        # Context multilabel used for conditionals
+        self.contexts = [MultiLabel({})]
+
+    def current_context(self):
+        return self.contexts[-1].clone()
 
     def visit(self, node: ast.AST, policy: Policy, mtlb: MultiLabelling,
               vulns: Vulnerability):
@@ -48,7 +52,9 @@ class IFVisitor():
                        vulns: Vulnerability) -> MultiLabelling:
 
         for stmt in nodes:
-            mtlb = self.visit(stmt, policy, mtlb, vulns)
+            value = self.visit(stmt, policy, mtlb, vulns)
+            if type(value) == MultiLabelling:
+                mtlb = value
 
         return mtlb
 
@@ -73,24 +79,35 @@ class IFVisitor():
     def visit_constant(self, node: ast.Constant, policy: Policy,
                        mtlb: MultiLabelling,
                        vulns: Vulnerability) -> MultiLabel:
-        return MultiLabel()
+        return self.current_context()
 
     def visit_name(self, node: ast.Name, policy: Policy, mtlb: MultiLabelling,
                    vulns: Vulnerability) -> MultiLabel:
-        return mtlb.mlabel_of(node.id)
+        return mtlb.mlabel_of(node.id).combine(self.current_context())
 
     def visit_if(self, node: ast.If, policy: Policy, mtlb: MultiLabelling,
                  vulns: Vulnerability) -> MultiLabelling:
 
-        self.visit_multiple(node.body, policy, mtlb, vulns)
+        condmlb = self.visit(node.test, policy, mtlb, vulns)
 
+        self.contexts.append(condmlb.clone())
+
+        taken = self.visit_multiple(node.body, policy, mtlb, vulns)
+        not_taken = mtlb
         if node.orelse:
-            self.visit_multiple(node.orelse, policy, mtlb, vulns)
+            not_taken = self.visit_multiple(node.body, policy, mtlb, vulns)
+
+        self.contexts.pop()
+
+        return taken.combine(not_taken)
 
     def visit_compare(self, node: ast.Compare, policy: Policy,
                       mtlb: MultiLabelling,
                       vulns: Vulnerability) -> MultiLabel:
-        return MultiLabel()
+
+        # TODO
+
+        return MultiLabel({})
 
     def visit_expr(self, node: ast.Expr, policy: Policy, mtlb: MultiLabelling,
                    vulns: Vulnerability) -> MultiLabel:
@@ -101,7 +118,7 @@ class IFVisitor():
         name = node.func.id
 
         # Merge all multilabels of the arguments
-        mlb = MultiLabel({})
+        mlb = self.current_context()
         for arg in node.args:
             argmlb = self.visit(arg, policy, mtlb, vulns)
             logging.debug(
@@ -140,6 +157,8 @@ class IFVisitor():
     def visit_while(self, node: ast.While, policy: Policy,
                     mtlb: MultiLabelling,
                     vulns: Vulnerability) -> MultiLabelling:
+
+        # TODO
 
         self.visit(node.test, policy, mtlb, vulns)
 
