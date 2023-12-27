@@ -2,6 +2,27 @@ from __future__ import annotations
 import logging
 
 
+class Element:
+    """
+    Represents a function/variable found at a given line
+    """
+
+    def __init__(self, name: str, lineno: int):
+        self.name = name
+        self.lineno = lineno
+
+    def __repr__(self) -> str:
+        return f"{self.name}@{self.lineno}"
+
+    def __eq__(self, other):
+        if isinstance(other, Element):
+            return self.name == other.name and self.lineno == other.lineno
+        return False
+
+    def __hash__(self):
+        return hash(self.name) ^ hash(self.lineno)
+
+
 class Pattern:
     """
     Represents a vulnerability pattern, including all its components.
@@ -33,8 +54,17 @@ class Pattern:
     def is_sanitizer(self, name: str) -> bool:
         return name in self.sanitizers
 
-    def is_sink(self, name: str) -> bos1ol:
+    def is_sink(self, name: str) -> bool:
         return name in self.sinks
+
+    def from_json(json: str) -> Pattern:
+        return Pattern(
+            json["vulnerability"],
+            json["sources"],
+            json["sanitizers"],
+            json["sinks"],
+            json["implicit"] == "yes",
+        )
 
 
 class Label:
@@ -45,32 +75,32 @@ class Label:
     information since its flow from each source.
     """
 
-    def __init__(self, pattern: str, contents: dict[str, list[str]],
-                 sources: list[str]):
+    def __init__(self, pattern: str, contents: dict[Element, list[Element]],
+                 sources: list[Element]):
         # Maps sanitizers to sources it was applied to
         self.contents = contents
         self.sources = sources
         self.pattern = pattern
 
-    def add_source(self, source: str):
+    def add_source(self, source: Element):
         self.sources.append(source)
 
-    def add_sources(self, sources: list[str]):
+    def add_sources(self, sources: list[Element]):
         for s in sources:
             self.add_source(source)
 
-    def add_sanitizer(self, sanitizer: str):
+    def add_sanitizer(self, sanitizer: Element):
         # Sanitizer sanitizes all existing sources
         self.contents[sanitizer] = self.sources.copy()
 
-    def add_sanitizers(self, sanitizers: list[str]):
+    def add_sanitizers(self, sanitizers: list[Element]):
         for s in sanitizers:
             self.add_sanitizer(s)
 
-    def get_sources(self) -> list[str]:
+    def get_sources(self) -> list[Element]:
         return self.sources
 
-    def get_sanitizers(self) -> list[str]:
+    def get_sanitizers(self) -> list[Element]:
         return list(self.contents.keys())
 
     def __add__(self, other: Self) -> Self:
@@ -210,30 +240,23 @@ class Policy:
         A label fits a pattern from the database for a given sink name `A` if the
         label has a source `B` such that there is a pattern with source `B` and sink `A`
         """
-        # TODO: rethink
-
-        with_sink = set(self.search_sink(sink))
 
         bad_labels = {}
-        # TODO: refactor (just use list functionals)
-        for label in ml.get_labels().values():
-            for source in label.sources:
-                if len(
-                        set(self.search_source(source)).intersection(
-                            with_sink)):
-                    bad_labels[label.pattern] = label
-                    break
+        for pattern in self.patterns:
+            if pattern.is_sink(sink):
+                lbl = ml.get_label(pattern.name)
+                for source_el in lbl.sources:
+                    if pattern.is_source(source_el.name):
+                        bad_labels[lbl.pattern] = lbl
 
         return MultiLabel(bad_labels)
 
-# Tito's
-# def illegal_flows(self, name: str, label: Multilabel) -> Multilabel:
-#         return Multilabel([
-#             Label({
-#                 p.name: label[p.name]
-#             }, label[p.name].get_sources())
-#             for p in self.patterns if p.is_sink(name)
-        ])
+    def __repr__(self) -> str:
+        s = f"Policy {{ "
+        for p in self.patterns:
+            s += f"{str(p)}, "
+        s += f" }}"
+        return s
 
 
 class MultiLabelling:
@@ -308,18 +331,29 @@ class Vulnerability:
     a program slice.
     """
 
-    def __init__(self, illegal_flows: dict[str, MultiLabel] = {}):
+    def __init__(self, illegal_flows: dict[str, list[MultiLabel]] = {}):
         self.illegal_flows = illegal_flows  # Maps vulnerability name to illegal flows
 
-    def save(self, name: str, ml: MultiLabel):
+    def save(self, sink: Element, ml: MultiLabel):
         """
         Saves multilabel which contains the sources and the sanitizers for the
         patterns for which the name is a sink and the flows are illegal (for
         reporting at the end of the analysis)
         """
 
-        if name in self.illegal_flows:
-            # TODO: what to do in this case? can this even happen?
-            pass
+        if sink not in self.illegal_flows:
+            self.illegal_flows[sink] = []
 
-        self.illegal_flows[name] = ml
+        self.illegal_flows[sink].append(ml)
+
+    def __repr__(self) -> str:
+        s = f"Vulnerability {{ "
+        for var in self.illegal_flows:
+            s += f"{var}: {str(self.illegal_flows[var])}, "
+        s += f" }}"
+        return s
+
+    def to_json(self) -> str:
+        s = "["
+        # TODO
+        s += "]"

@@ -3,7 +3,6 @@ import IFVisitor as ifv
 from flow_follow import *
 import logging
 
-
 def ast_parse(filename: str):
     # logging.basicConfig(level=logging.INFO, filename="log.log", filemode="w")
     logging.basicConfig(level=logging.DEBUG)
