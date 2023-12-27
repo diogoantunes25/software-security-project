@@ -32,7 +32,9 @@ def main(slice: str, patterns: str):
     vis = ifv.IFVisitor()
     ifresult = vis.visit(tree, policy, mtlb, vulns)
 
-    logging.info(f"Identified vulnerabilities are:\n{str(vulns)}")
+    # logging.info(f"Identified vulnerabilities are:\n{str(vulns)}")
+
+    print(vulns.to_json())
 
 
 if __name__ == "__main__":

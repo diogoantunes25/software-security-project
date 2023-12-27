@@ -46,6 +46,9 @@ class IFVisitor():
         elif type(node) == ast.BinOp:
             return self.visit_bin_op(node, policy, mtlb, vulns)
 
+        elif type(node) == ast.Attribute:
+            return self.visit_attribute(node, policy, mtlb, vulns)
+
         else:
             raise ValueError(
                 f"Unknown (or Unsupported) AST node - {type(node)}")
@@ -133,11 +136,17 @@ class IFVisitor():
         taken = self.visit_multiple(node.body, policy, mtlb, vulns)
         not_taken = mtlb
         if node.orelse:
-            not_taken = self.visit_multiple(node.body, policy, mtlb, vulns)
+            logging.debug("visiting orelse node")
+            not_taken = self.visit_multiple(node.orelse, policy, mtlb, vulns)
 
         self.contexts.pop()
+        ans = taken.combine(not_taken)
 
-        return taken.combine(not_taken)
+        logging.debug(f"taken path: {taken}")
+        logging.debug(f"not taken path: {not_taken}")
+        logging.debug(f"taken + not taken path: {ans}")
+
+        return ans
 
     def visit_compare(self, node: ast.Compare, policy: Policy,
                       mtlb: MultiLabelling,

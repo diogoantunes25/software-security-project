@@ -1,5 +1,5 @@
 from __future__ import annotations
-import logging
+import logging, json
 
 
 class Pattern:
@@ -324,13 +324,15 @@ class MultiLabelling:
         hold.
         """
 
+        logging.debug(f"Combining {self} and {other}")
+
         combination = self.clone()
         for variable in other.mapping:
             if variable not in combination.mapping:
                 combination.mapping[variable] = MultiLabel({})
 
-            combination.mapping[variable].combine(
-                other.mapping[variable].clone())
+            combination.mapping[variable] = combination.mapping[
+                variable].combine(other.mapping[variable].clone())
 
         return combination
 
@@ -371,6 +373,52 @@ class Vulnerability:
         return s
 
     def to_json(self) -> str:
-        s = "["
-        # TODO
-        s += "]"
+        vulns = {}
+
+        for sink in self.illegal_flows:
+            flows = self.illegal_flows[sink]
+            for mlb in self.illegal_flows[sink]:
+                for lbl in mlb.labels.values():
+                    for val in lbl.values:
+                        src = val.get_source()
+                        key = ((src.name, src.lineno),
+                               (sink.name, sink.lineno), lbl.pattern)
+                        if key not in vulns:
+                            vulns[key] = []
+
+                        sanitization = []
+                        while type(val) != Source:
+                            sanitization.append([val.name, val.lineno])
+                            val = val.of
+
+                        vulns[key].append(sanitization)
+
+        ans = []
+        count = {}
+
+        for key in vulns:
+            traces = vulns[key]
+            src, sink, vuln_name = key
+            src_name, src_lineno = src
+            sink_name, sink_lineno = sink
+            d = {}
+            if vuln_name not in count:
+                count[vuln_name] = 0
+
+            count[vuln_name] += 1
+            d["vulnerability"] = f"{vuln_name}_{count[vuln_name]}"
+            d["source"] = [src_name, src_lineno]
+            d["sink"] = [sink_name, sink_lineno]
+
+            empty = False
+            d["sanitized_flows"] = []
+            for trace in traces:
+                if len(trace) == 0:
+                    empty = True
+                else:
+                    d["sanitized_flows"].append(trace)
+
+            d["unsanitized_flows"] = "yes" if empty else "no"
+            ans.append(d)
+
+        return json.dumps(ans, indent=4)
