@@ -2,7 +2,7 @@ import ast
 from flow_follow import *
 import logging
 
-WHILE_COUNT = 2
+WHILE_COUNT = 3
 
 
 class IFVisitor():
@@ -237,19 +237,28 @@ class IFVisitor():
         self.contexts.append(condmlb.clone())
 
         aggregate_cond_mlb = condmlb
-        for _ in range(WHILE_COUNT):
+        old_mtlb = None
+        i = 0
+        logging.debug(f"(start) Multilabelling is {mtlb}")
+        # Uses fixed point algorithm
+        # TODO: do the same as in the if case (regarding unitialized variables)
+        while old_mtlb != mtlb:
+            old_mtlb = mtlb.clone()
 
             taken = self.visit_multiple(node.body, policy, mtlb, vulns)
             not_taken = mtlb
             # TODO: handle orelse (a bit akward in while context)
 
             mtlb = taken.combine(not_taken)
+            logging.debug(f"(i={i}) Multilabelling is {mtlb}")
 
             condmlb = self.visit(node.test, policy, mtlb, vulns)
             aggregate_cond_mlb = aggregate_cond_mlb.combine(condmlb)
+            i += 1
             self.contexts.append(condmlb.clone())
 
-        for _ in range(WHILE_COUNT + 1):
+        logging.debug(f"parsing while stopped after {i} iterations")
+        for _ in range(i + 1):
             self.contexts.pop()
 
         # leave as context the aggregate multilabel (encodes all possible values

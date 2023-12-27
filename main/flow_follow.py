@@ -66,6 +66,9 @@ class Element:
     def __hash__(self):
         return hash(self.name) ^ hash(self.lineno)
 
+    def clone(self):
+        return Element(self.name, self.lineno)
+
 
 class Source(Element):
 
@@ -81,13 +84,29 @@ class Source(Element):
     def __hash__(self):
         return hash(self.name) ^ hash(self.lineno)
 
+    def __eq__(self, other):
+        if not isinstance(other, Source):
+            return False
+        return self.name == other.name and self.lineno == other.lineno
+
+    def clone(self):
+        return Source(self.name, self.lineno)
+
 
 class Sanitized(Element):
 
     def __init__(self, name: str, lineno: int, of: Element):
         super().__init__(name, lineno)
         assert (type(of) == Source or type(of) == Sanitized)
-        self.of = of
+
+        self.name = name
+        self.lineno = lineno
+
+        # Don't do two sanitizers in a row (TODO: What about f, g, f, g ?)
+        if name == of.name and lineno == of.lineno:
+            self.of = of.of
+        else:
+            self.of = of
 
     def __repr__(self) -> str:
         return f"Sanitized({self.name}@{self.lineno} | {self.of})"
@@ -97,6 +116,14 @@ class Sanitized(Element):
 
     def __hash__(self):
         return hash(self.name) ^ hash(self.lineno) ^ hash(self.of)
+
+    def __eq__(self, other):
+        if not isinstance(other, Sanitized):
+            return False
+        return self.name == other.name and self.lineno == other.lineno and self.of == other.of
+
+    def clone(self):
+        return Sanitized(self.name, self.lineno, self.of.clone())
 
 
 class Label:
@@ -112,6 +139,12 @@ class Label:
         assert (type(values) == set)
         self.values = values
         self.pattern = pattern
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Label):
+            return False
+
+        return self.pattern == other.pattern and self.values == other.values
 
     def add_source(self, source: Source):
         assert (type(source) == Source)
@@ -144,7 +177,12 @@ class Label:
         Returns deep copy (immutable, not deep copy needed)
         """
 
-        return self
+        new = set()
+
+        for el in self.values:
+            new.add(el.clone())
+
+        return Label(self.pattern, new)
 
     def __repr__(self) -> str:
         return f"Label[{self.pattern}] {{ {self.values} }}"
@@ -157,10 +195,22 @@ class MultiLabel:
     different label policies (i.e. a vector of labels)
     """
 
-    def __init__(self, labels):
+    def __init__(self, labels: dict[str, Label]):
         # Maps pattern name to labels
         assert (type(labels) == dict)
         self.labels = labels
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, MultiLabel):
+            return False
+
+        if list(self.labels.keys()) != list(other.labels.keys()):
+            return False
+
+        for var in self.labels:
+            if self.labels[var] != other.labels[var]:
+                return False
+        return True
 
     def get_labels(self):
         return self.labels
@@ -281,6 +331,18 @@ class MultiLabelling:
 
     def __init__(self, mapping: dict[str, MultiLabel]):
         self.mapping = mapping
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, MultiLabelling):
+            return False
+
+        if list(self.mapping.keys()) != list(other.mapping.keys()):
+            return False
+
+        for var in self.mapping:
+            if self.mapping[var] != other.mapping[var]:
+                return False
+        return True
 
     def mlabel_of(self, variable: str) -> MultiLabel:
         """
