@@ -76,6 +76,9 @@ class IFVisitor():
         new = mtlb.clone()
 
         for target in node.targets:
+            logging.debug(
+                f"checking if the multilabel {value_mlb} is illegal for {target.id}"
+            )
             bad_labels = policy.find_illegal(target.id, value_mlb)
             logging.debug(
                 f"Saving the following vulnerabilities for {target.id} - {bad_labels}"
@@ -127,6 +130,10 @@ class IFVisitor():
             # Create label with single source and no sanitizers
             mlb.labels[pattern.name] = Label(
                 pattern.name, set([Source(node.id, node.lineno)]))
+
+        logging.debug(
+            f"not initialized variable found '{node.id}'. the multilabel is {mlb}"
+        )
 
         return mlb.combine(self.current_context())
 

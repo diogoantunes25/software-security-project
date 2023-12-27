@@ -262,9 +262,7 @@ class Policy:
         for pattern in self.patterns:
             if pattern.is_sink(sink):
                 lbl = ml.get_label(pattern.name)
-                for el in lbl.values:
-                    if pattern.is_source(el.get_source().name):
-                        bad_labels[lbl.pattern] = lbl
+                bad_labels[lbl.pattern] = lbl
 
         return MultiLabel(bad_labels)
 
