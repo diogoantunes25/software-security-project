@@ -142,6 +142,7 @@ class IFVisitor():
 
         condmlb = self.visit(node.test, policy, mtlb, vulns)
 
+        logging.debug(f"pushing the following context: {condmlb}")
         self.contexts.append(condmlb.clone())
 
         taken = self.visit_multiple(node.body, policy, mtlb, vulns)
@@ -177,12 +178,12 @@ class IFVisitor():
                       mtlb: MultiLabelling,
                       vulns: Vulnerability) -> MultiLabel:
 
-        new: MultiLabel = self.visit(node.left, policy, mtlb, vulns)
+        aggregate: MultiLabel = self.visit(node.left, policy, mtlb, vulns)
 
         for val in node.comparators:
-            new = self.visit(val, policy, mtlb, vulns)
+            aggregate = self.visit(val, policy, mtlb, vulns).combine(aggregate)
 
-        return new
+        return aggregate
 
     def visit_expr(self, node: ast.Expr, policy: Policy, mtlb: MultiLabelling,
                    vulns: Vulnerability) -> MultiLabel:
