@@ -96,35 +96,39 @@ class IFVisitor():
     def visit_name(self, node: ast.Name, policy: Policy, mtlb: MultiLabelling,
                    vulns: Vulnerability) -> MultiLabel:
 
-        lbl = mtlb.mlabel_of(node.id)
+        mlb = mtlb.mlabel_of(node.id)
 
-        if lbl is not None:
+        if mlb is not None:
+            # Some variables might have markes as unitilialized. The line number
+            # should be replaced in (the vulnerability is only reported on evaluation)
+            for lbl in mlb.labels.values():
+                for val in lbl.values:
+                    if val.lineno == -1:
+                        val.lineno = node.lineno
 
             # if variable is a source for some pattern, it's always a source
             # so, the multilabel with this information must be merged with remaining information
             src_patterns = policy.search_source(node.id)
             og_mlb = MultiLabel({})
             for pat in src_patterns:
-                # og_mlb.labels[pat] = Label(pat, {},
-                #                            [Element(node.id, node.lineno)])
                 og_mlb.labels[pat] = Label(pat,
                                            set([Source(node.id, node.lineno)]))
-            lbl = lbl.combine(og_mlb)
+            mlb = mlb.combine(og_mlb)
 
             logging.debug(
-                f"Evaluated {node.id} to {lbl} (before combining with context)"
+                f"Evaluated {node.id} to {mlb} (before combining with context)"
             )
 
-            return lbl.combine(self.current_context())
+            return mlb.combine(self.current_context())
 
         # if variable does not have multilabel (i.e. it's not initialized), it's a source for all patterns
-        lbl = MultiLabel({})
+        mlb = MultiLabel({})
         for pattern in policy.patterns:
             # Create label with single source and no sanitizers
-            lbl.labels[pattern.name] = Label(
+            mlb.labels[pattern.name] = Label(
                 pattern.name, set([Source(node.id, node.lineno)]))
 
-        return lbl.combine(self.current_context())
+        return mlb.combine(self.current_context())
 
     def visit_if(self, node: ast.If, policy: Policy, mtlb: MultiLabelling,
                  vulns: Vulnerability) -> MultiLabelling:
@@ -140,6 +144,20 @@ class IFVisitor():
             not_taken = self.visit_multiple(node.orelse, policy, mtlb, vulns)
 
         self.contexts.pop()
+
+        # TODO: all variables defined in multilabelling from one branch and not the other
+        # should be added to the branches multilabelling with the initial value (as if evaluated
+        # at start
+
+        for (a, b) in ((taken, not_taken), (not_taken, taken)):
+            for var in a.mapping:
+                if var not in b.mapping:
+                    lbl = MultiLabel({})
+                    for pattern in policy.patterns:
+                        lbl.labels[pattern.name] = Label(
+                            pattern.name, set([Source(var, -1)]))
+                    b.mapping[var] = lbl
+
         ans = taken.combine(not_taken)
 
         logging.debug(f"taken path: {taken}")
