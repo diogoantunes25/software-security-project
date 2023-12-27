@@ -102,8 +102,10 @@ class IFVisitor():
             src_patterns = policy.search_source(node.id)
             og_mlb = MultiLabel({})
             for pat in src_patterns:
-                og_mlb.labels[pat] = Label(pat, {},
-                                           [Element(node.id, node.lineno)])
+                # og_mlb.labels[pat] = Label(pat, {},
+                #                            [Element(node.id, node.lineno)])
+                og_mlb.labels[pat] = Label(pat,
+                                           set([Source(node.id, node.lineno)]))
             lbl = lbl.combine(og_mlb)
 
             logging.debug(
@@ -116,8 +118,8 @@ class IFVisitor():
         lbl = MultiLabel({})
         for pattern in policy.patterns:
             # Create label with single source and no sanitizers
-            lbl.labels[pattern.name] = Label(pattern.name, {},
-                                             [Element(node.id, node.lineno)])
+            lbl.labels[pattern.name] = Label(
+                pattern.name, set([Source(node.id, node.lineno)]))
 
         return lbl.combine(self.current_context())
 
@@ -173,7 +175,7 @@ class IFVisitor():
         for pattern in sources:
             logging.debug(f"{name} is a source for {str(pattern)}")
             lbl = mlb.get_label(pattern.name)
-            lbl.add_source(Element(name, node.lineno))
+            lbl.add_source(Source(name, node.lineno))
 
         # Patterns for which name is a sanitizer - is combination of label of args + sanitization
         sanitizers = policy.search_sanitizer(name)

@@ -2,27 +2,6 @@ from __future__ import annotations
 import logging
 
 
-class Element:
-    """
-    Represents a function/variable found at a given line
-    """
-
-    def __init__(self, name: str, lineno: int):
-        self.name = name
-        self.lineno = lineno
-
-    def __repr__(self) -> str:
-        return f"{self.name}@{self.lineno}"
-
-    def __eq__(self, other):
-        if isinstance(other, Element):
-            return self.name == other.name and self.lineno == other.lineno
-        return False
-
-    def __hash__(self):
-        return hash(self.name) ^ hash(self.lineno)
-
-
 class Pattern:
     """
     Represents a vulnerability pattern, including all its components.
@@ -67,6 +46,59 @@ class Pattern:
         )
 
 
+class Element:
+    """
+    Represents a function/variable found at a given line
+    """
+
+    def __init__(self, name: str, lineno: int):
+        self.name = name
+        self.lineno = lineno
+
+    def __repr__(self) -> str:
+        return f"{self.name}@{self.lineno}"
+
+    def __eq__(self, other):
+        if isinstance(other, Element):
+            return self.name == other.name and self.lineno == other.lineno
+        return False
+
+    def __hash__(self):
+        return hash(self.name) ^ hash(self.lineno)
+
+
+class Source(Element):
+
+    def __init__(self, name: str, lineno: int):
+        super().__init__(name, lineno)
+
+    def __repr__(self) -> str:
+        return f"Source({self.name}@{self.lineno})"
+
+    def get_source(self) -> Source:
+        return self
+
+    def __hash__(self):
+        return hash(self.name) ^ hash(self.lineno)
+
+
+class Sanitized(Element):
+
+    def __init__(self, name: str, lineno: int, of: Element):
+        super().__init__(name, lineno)
+        assert (type(of) == Source or type(of) == Sanitized)
+        self.of = of
+
+    def __repr__(self) -> str:
+        return f"Sanitized({self.name}@{self.lineno} | {self.of})"
+
+    def get_source(self) -> Source:
+        return self.of.get_source()
+
+    def __hash__(self):
+        return hash(self.name) ^ hash(self.lineno) ^ hash(self.of)
+
+
 class Label:
     """
     Represents the integrity of information that is carried by a resource.
@@ -75,62 +107,47 @@ class Label:
     information since its flow from each source.
     """
 
-    def __init__(self, pattern: str, contents: dict[Element, list[Element]],
-                 sources: list[Element]):
+    def __init__(self, pattern: str, values: set[Element]):
         # Maps sanitizers to sources it was applied to
-        self.contents = contents
-        self.sources = sources
+        assert (type(values) == set)
+        self.values = values
         self.pattern = pattern
 
-    def add_source(self, source: Element):
-        self.sources.append(source)
+    def add_source(self, source: Source):
+        assert (type(source) == Source)
+        self.values.add(source)
 
     def add_sources(self, sources: list[Element]):
         for s in sources:
             self.add_source(source)
 
     def add_sanitizer(self, sanitizer: Element):
+        assert (type(sanitizer) == Element)
         # Sanitizer sanitizes all existing sources
-        self.contents[sanitizer] = self.sources.copy()
+        new = set()
+        for val in self.values:
+            new_val = Sanitized(sanitizer.name, sanitizer.lineno, val)
+            new.add(new_val)
+
+        self.values = new
 
     def add_sanitizers(self, sanitizers: list[Element]):
         for s in sanitizers:
             self.add_sanitizer(s)
 
-    def get_sources(self) -> list[Element]:
-        return self.sources
-
-    def get_sanitizers(self) -> list[Element]:
-        return list(self.contents.keys())
-
-    def __add__(self, other: Self) -> Self:
-        return self.combine(other)
-
     def combine(self, other: Self) -> Self:
-        # Concatenate contents (creating copies of the lists)
-        c = {}
-        for s in self.contents:
-            c[s] = self.contents[s].copy()
-
-        for s in other.contents:
-            if s not in c: c[s] = []
-            c[s] += other.contents[s].copy()
-
-        return Label(self.pattern, c,
-                     self.get_sources().copy() + other.get_sources().copy())
+        assert (self.pattern == other.pattern)
+        return Label(self.pattern, self.values.union(other.values))
 
     def clone(self) -> Label:
         """
-        Returns deep copy
+        Returns deep copy (immutable, not deep copy needed)
         """
 
-        return Label(self.pattern, {
-            san: [src for src in self.contents[san]]
-            for san in self.contents
-        }, [src for src in self.sources])
+        return self
 
     def __repr__(self) -> str:
-        return f"Label[{self.pattern}] {{ sources={self.sources}, sanitizers/sources map={self.contents}}}"
+        return f"Label[{self.pattern}] {{ {self.values} }}"
 
 
 class MultiLabel:
@@ -153,7 +170,7 @@ class MultiLabel:
         Get label give a pattern name
         """
         if pattern not in self.labels:
-            self.labels[pattern] = Label(pattern, {}, [])
+            self.labels[pattern] = Label(pattern, set())
 
         return self.labels[pattern]
 
@@ -166,7 +183,7 @@ class MultiLabel:
 
         for pattern in other.labels:
             if pattern not in combination.labels:
-                combination.labels[pattern] = Label(pattern, {}, [])
+                combination.labels[pattern] = Label(pattern, set())
 
             combination.labels[pattern] = combination.labels[pattern].combine(
                 other.labels[pattern])
@@ -245,8 +262,8 @@ class Policy:
         for pattern in self.patterns:
             if pattern.is_sink(sink):
                 lbl = ml.get_label(pattern.name)
-                for source_el in lbl.sources:
-                    if pattern.is_source(source_el.name):
+                for el in lbl.values:
+                    if pattern.is_source(el.get_source().name):
                         bad_labels[lbl.pattern] = lbl
 
         return MultiLabel(bad_labels)
