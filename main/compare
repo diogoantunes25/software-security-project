@@ -1,0 +1,23 @@
+#! /usr/bin/env python3
+
+import sys, json
+
+output_file = sys.argv[1]
+myout_file = sys.argv[2]
+
+with open(output_file, "r") as fh:
+    output = json.load(fh)
+    
+with open(myout_file, "r") as fh:
+    myout = json.load(fh)
+
+
+def clean(lst):
+    for e in lst:
+        e["vulnerability"] = e["vulnerability"].split("_")[0]
+
+    return lst
+
+if clean(output) == clean(myout):
+    exit(0)
+exit(1)

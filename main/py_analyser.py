@@ -23,7 +23,7 @@ def load_policy(filename: str) -> Policy:
 
 def main(slice: str, patterns: str):
     tree = load_tree(slice)
-    print(ast.dump(tree, indent=4))
+    print(ast.dump(tree, indent=4), file=sys.stderr)
     policy = load_policy(patterns)
 
     mtlb = MultiLabelling({})
