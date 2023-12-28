@@ -308,7 +308,6 @@ class IFVisitor():
                                 pattern.name, set([Source(var, -1)]))
                         b.mapping[var] = lbl
 
-
             mtlb = taken.combine(not_taken)
             logging.debug(f"(i={i}) Multilabelling is {mtlb}")
 
@@ -370,8 +369,7 @@ class IFVisitor():
             map(lambda n: self.visit(n, policy, mtlb, vulns), node.values))
 
     def visit_pass(self, node: ast.UnaryOp, policy: Policy,
-                       mtlb: MultiLabelling,
-                       vulns: Vulnerability) -> MultiLabelling:
+                   mtlb: MultiLabelling,
+                   vulns: Vulnerability) -> MultiLabelling:
 
         return mtlb
-
