@@ -1,4 +1,5 @@
 #! /bin/bash
+TIMEOUT=1
 
 RED="\e[31m"
 GREEN="\e[32m"
@@ -16,14 +17,20 @@ run_test() {
 		output="$folder/$name.output.json"
 		myout="$folder/$name.my.json"
 		log="$folder/$name.log"
-		$run $script $patterns > $myout 2> $log
-		./compare $output $myout 
+		timeout $TIMEOUT $run $script $patterns > $myout 2> $log
 		if [ $? -eq 0 ];
 		then
-			echo -e "$GREEN success $ENDCOLOR"
+			./compare $output $myout 
+			if [ $? -eq 0 ];
+			then
+				echo -e "$GREEN success $ENDCOLOR"
+			else
+				echo -e "$RED failed $ENDCOLOR"
+			fi
 		else
-			echo -e "$RED failed $ENDCOLOR"
+			echo -e "$RED timeout $ENDCOLOR"
 		fi
+		
 	done
 }
 
