@@ -2,12 +2,12 @@
     {
         "vulnerability": "A_1",
         "source": [
-            "read_input",
-            1
+            "a",
+            7
         ],
         "sink": [
-            "sink",
-            7
+            "c",
+            8
         ],
         "unsanitized_flows": "yes",
         "sanitized_flows": []
