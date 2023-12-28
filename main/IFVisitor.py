@@ -61,6 +61,12 @@ class IFVisitor():
         elif type(node) == ast.Attribute:
             return self.visit_attribute(node, policy, mtlb, vulns)
 
+        elif type(node) == ast.UnaryOp:
+            return self.visit_unary_op(node, policy, mtlb, vulns)
+
+        elif type(node) == ast.BoolOp:
+            return self.visit_bool_op(node, policy, mtlb, vulns)
+
         else:
             raise ValueError(
                 f"Unknown (or Unsupported) AST node - {type(node)}")
@@ -332,3 +338,17 @@ class IFVisitor():
         logging.info(f"attr of attribute node: {str(attr_lbl)}")
 
         return value_lbl.combine(attr_lbl)
+
+    def visit_unary_op(self, node: ast.UnaryOp, policy: Policy,
+                       mtlb: MultiLabelling,
+                       vulns: Vulnerability) -> MultiLabel:
+
+        return self.visit(node.operand, policy, mtlb, vulns)
+
+    def visit_bool_op(self, node: ast.BoolOp, policy: Policy,
+                      mtlb: MultiLabelling,
+                      vulns: Vulnerability) -> MultiLabel:
+
+        return functools.reduce(
+            lambda a, b: a.combine(b),
+            map(lambda n: self.visit(n, policy, mtlb, vulns), node.values))
