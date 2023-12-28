@@ -1,8 +1,7 @@
 import ast
 from flow_follow import *
 import logging
-
-WHILE_COUNT = 3
+import functools
 
 
 class IFVisitor():
@@ -13,6 +12,19 @@ class IFVisitor():
 
     def current_context(self):
         return self.contexts[-1].clone()
+
+    def flat_vars(node: ast.AST) -> list[str]:
+        """
+        Receives either a name or an attribute and returns the list 
+        of names.
+        Examples:
+            - flat_vars(a) = ['a']
+            - flat_vars(a.b.c) = ['a', 'b', 'c']
+        """
+
+        assert (type(node) == ast.Name or type(node) == ast.Attribute)
+        if type(node) == ast.Name: return [node.id]
+        return IFVisitor.flat_vars(node.value) + [node.attr]
 
     def visit(self, node: ast.AST, policy: Policy, mtlb: MultiLabelling,
               vulns: Vulnerability):
@@ -72,20 +84,25 @@ class IFVisitor():
     def visit_assign(self, node: ast.Assign, policy: Policy,
                      mtlb: MultiLabelling,
                      vulns: Vulnerability) -> MultiLabelling:
+
         value_mlb = self.visit(node.value, policy, mtlb, vulns)
         new = mtlb.clone()
 
+        targets = []
         for target in node.targets:
-            logging.debug(
-                f"checking if the multilabel {value_mlb} is illegal for {target.id}"
-            )
-            bad_labels = policy.find_illegal(target.id, value_mlb)
-            logging.debug(
-                f"Saving the following vulnerabilities for {target.id} - {bad_labels}"
-            )
-            vulns.save(Element(target.id, node.lineno), bad_labels)
+            targets += IFVisitor.flat_vars(target)
 
-            new.mlabel_set(target.id, value_mlb)
+        for target in targets:
+            logging.debug(
+                f"checking if the multilabel {value_mlb} is illegal for {target}"
+            )
+            bad_labels = policy.find_illegal(target, value_mlb)
+            logging.debug(
+                f"Saving the following vulnerabilities for {target} - {bad_labels}"
+            )
+            vulns.save(Element(target, node.lineno), bad_labels)
+
+            new.mlabel_set(target, value_mlb)
 
         logging.debug(f"Multilabelling after assign is {str(new)}")
 
@@ -191,7 +208,26 @@ class IFVisitor():
 
     def visit_call(self, node: ast.Call, policy: Policy, mtlb: MultiLabelling,
                    vulns: Vulnerability) -> MultiLabel:
-        name = node.func.id
+        vars = IFVisitor.flat_vars(node.func)
+        name = vars[-1]
+
+        if len(vars) > 1:
+            # Turn a.b.c() into a + b + c()
+            fake_nodes = list(
+                map(lambda n: ast.Name(n, None, lineno=node.lineno),
+                    vars[:-1]))
+            fake_nodes.append(
+                ast.Call(ast.Name(name, lineno=node.lineno),
+                         node.args,
+                         node.keywords,
+                         lineno=node.lineno))
+            fake_sum = functools.reduce(
+                lambda a, b: ast.BinOp(
+                    left=a, op=ast.Add(), right=b, lineno=node.lineno),
+                fake_nodes)
+            logging.debug(
+                f"Reduced {ast.dump(node)} into {ast.dump(fake_sum)}")
+            return self.visit(fake_sum, policy, mtlb, vulns)
 
         # Merge all multilabels of the arguments
         mlb = self.current_context()
@@ -228,6 +264,7 @@ class IFVisitor():
         vulns.save(Element(name, node.lineno), bad_labels)
 
         logging.debug(f"Call for {name} has final multilabel of {str(mlb)}")
+
         return mlb
 
     def visit_while(self, node: ast.While, policy: Policy,
@@ -277,3 +314,21 @@ class IFVisitor():
         logging.info(f"right of binary node: {str(right)}")
 
         return left.combine(right)
+
+    def visit_attribute(self, node: ast.Attribute, policy: Policy,
+                        mtlb: MultiLabelling,
+                        vulns: Vulnerability) -> MultiLabel:
+
+        # Note that this method is only called when attribute is on the right
+        # hand side (so this is to be handled as a binary operation)
+
+        value_lbl = self.visit(node.value, policy, mtlb, vulns)
+        logging.info(f"value of attribute node: {str(value_lbl)}")
+
+        # I want to handle the attribute as variable, so instead of copying code,
+        # create a fake Name node
+        fake_node = ast.Name(node.attr, None)
+        attr_lbl = self.visit(fake_node, policy, mtlb, vulns)
+        logging.info(f"attr of attribute node: {str(attr_lbl)}")
+
+        return value_lbl.combine(attr_lbl)
