@@ -26,4 +26,5 @@ for name in $(ls "$folder/" | grep py | cut -d . -f 1); do
 	fi
 done
 
+echo ""
 echo "Running our tests..."

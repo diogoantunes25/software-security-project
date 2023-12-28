@@ -11,13 +11,24 @@ with open(output_file, "r") as fh:
 with open(myout_file, "r") as fh:
     myout = json.load(fh)
 
-
 def clean(lst):
     for e in lst:
         e["vulnerability"] = e["vulnerability"].split("_")[0]
+        e["sanitized_flows"] = sorted(e["sanitized_flows"], key=len)
 
     return lst
 
-if clean(output) == clean(myout):
+def same(a, b):
+    if len(a) != len(b):
+        return False
+
+    for el in a:
+        if el not in b:
+            return False
+        b.remove(el)
+    return True
+
+if same(clean(output), clean(myout)):
     exit(0)
+
 exit(1)

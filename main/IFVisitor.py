@@ -299,7 +299,7 @@ class IFVisitor():
             condmlb = self.visit(node.test, policy, mtlb, vulns)
             aggregate_cond_mlb = aggregate_cond_mlb.combine(condmlb)
             i += 1
-            self.contexts.append(condmlb.clone())
+            self.contexts.append(condmlb.clone().filter_implicit(policy))
 
         logging.debug(f"parsing while stopped after {i} iterations")
         for _ in range(i + 1):
@@ -307,7 +307,7 @@ class IFVisitor():
 
         # leave as context the aggregate multilabel (encodes all possible values
         # that were in the condition)
-        self.contexts.append(aggregate_cond_mlb)
+        self.contexts.append(aggregate_cond_mlb.filter_implicit(policy))
 
         return mtlb
 
