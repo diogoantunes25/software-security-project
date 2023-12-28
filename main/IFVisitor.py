@@ -67,6 +67,9 @@ class IFVisitor():
         elif type(node) == ast.BoolOp:
             return self.visit_bool_op(node, policy, mtlb, vulns)
 
+        elif type(node) == ast.Pass:
+            return self.visit_pass(node, policy, mtlb, vulns)
+
         else:
             raise ValueError(
                 f"Unknown (or Unsupported) AST node - {type(node)}")
@@ -176,7 +179,7 @@ class IFVisitor():
 
         self.contexts.pop()
 
-        #all variables defined in multilabelling from one branch and not the other
+        # all variables defined in multilabelling from one branch and not the other
         # should be added to the branches multilabelling with the initial value (as if evaluated
         # at start)
 
@@ -284,14 +287,27 @@ class IFVisitor():
         old_mtlb = None
         i = 0
         logging.debug(f"(start) Multilabelling is {mtlb}")
-        # Uses fixed point algorithm
-        # TODO: do the same as in the if case (regarding unitialized variables)
+        # Uses fixed point algorithm (i.e. waits for fixed point)
         while old_mtlb != mtlb:
             old_mtlb = mtlb.clone()
 
             taken = self.visit_multiple(node.body, policy, mtlb, vulns)
-            not_taken = mtlb
             # TODO: handle orelse (a bit akward in while context)
+            not_taken = mtlb
+
+            # all variables defined in multilabelling from one branch and not the other
+            # should be added to the branches multilabelling with the initial value (as if evaluated
+            # at start) (similar to if node)
+
+            for (a, b) in ((taken, not_taken), (not_taken, taken)):
+                for var in a.mapping:
+                    if var not in b.mapping:
+                        lbl = MultiLabel({})
+                        for pattern in policy.patterns:
+                            lbl.labels[pattern.name] = Label(
+                                pattern.name, set([Source(var, -1)]))
+                        b.mapping[var] = lbl
+
 
             mtlb = taken.combine(not_taken)
             logging.debug(f"(i={i}) Multilabelling is {mtlb}")
@@ -306,7 +322,7 @@ class IFVisitor():
             self.contexts.pop()
 
         # leave as context the aggregate multilabel (encodes all possible values
-        # that were in the condition)
+        # that were in the condition and that taint everything because of loop termination)
         self.contexts.append(aggregate_cond_mlb.filter_implicit(policy))
 
         return mtlb
@@ -352,3 +368,10 @@ class IFVisitor():
         return functools.reduce(
             lambda a, b: a.combine(b),
             map(lambda n: self.visit(n, policy, mtlb, vulns), node.values))
+
+    def visit_pass(self, node: ast.UnaryOp, policy: Policy,
+                       mtlb: MultiLabelling,
+                       vulns: Vulnerability) -> MultiLabelling:
+
+        return mtlb
+
