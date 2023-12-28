@@ -7,9 +7,10 @@ myout_file = sys.argv[2]
 
 with open(output_file, "r") as fh:
     output = json.load(fh)
-    
+
 with open(myout_file, "r") as fh:
     myout = json.load(fh)
+
 
 def clean(lst):
     for e in lst:
@@ -17,6 +18,7 @@ def clean(lst):
         e["sanitized_flows"] = sorted(e["sanitized_flows"], key=len)
 
     return lst
+
 
 def same(a, b):
     if len(a) != len(b):
@@ -27,6 +29,7 @@ def same(a, b):
             return False
         b.remove(el)
     return True
+
 
 if same(clean(output), clean(myout)):
     exit(0)
