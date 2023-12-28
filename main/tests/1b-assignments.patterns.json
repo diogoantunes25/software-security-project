@@ -1,0 +1,15 @@
+[
+    {
+        "vulnerability": "SQLInjection",
+        "sources": [
+            "request"
+        ],
+        "sanitizers": [
+            "retrieve_uname"
+        ],
+        "sinks": [
+            "execute"
+        ],
+        "implicit": "yes"
+    }
+]

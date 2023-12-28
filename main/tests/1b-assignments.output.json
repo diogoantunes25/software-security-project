@@ -1,0 +1,22 @@
+[
+    {
+        "vulnerability": "SQLInjection_1",
+        "source": [
+            "request",
+            1
+        ],
+        "sink": [
+            "execute",
+            2
+        ],
+        "unsanitized_flows": "no",
+        "sanitized_flows": [
+            [
+                [
+                    "retrieve_uname",
+                    1
+                ]
+            ]
+        ]
+    }
+]
