@@ -160,7 +160,7 @@ class IFVisitor():
         condmlb = self.visit(node.test, policy, mtlb, vulns)
 
         logging.debug(f"pushing the following context: {condmlb}")
-        self.contexts.append(condmlb.clone())
+        self.contexts.append(condmlb.clone().filter_implicit(policy))
 
         taken = self.visit_multiple(node.body, policy, mtlb, vulns)
         not_taken = mtlb
@@ -170,9 +170,9 @@ class IFVisitor():
 
         self.contexts.pop()
 
-        # TODO: all variables defined in multilabelling from one branch and not the other
+        #all variables defined in multilabelling from one branch and not the other
         # should be added to the branches multilabelling with the initial value (as if evaluated
-        # at start
+        # at start)
 
         for (a, b) in ((taken, not_taken), (not_taken, taken)):
             for var in a.mapping:
@@ -272,7 +272,7 @@ class IFVisitor():
                     vulns: Vulnerability) -> MultiLabelling:
 
         condmlb = self.visit(node.test, policy, mtlb, vulns)
-        self.contexts.append(condmlb.clone())
+        self.contexts.append(condmlb.clone().filter_implicit(policy))
 
         aggregate_cond_mlb = condmlb
         old_mtlb = None

@@ -249,6 +249,18 @@ class MultiLabel:
             {name: self.labels[name].clone()
              for name in self.labels})
 
+    def filter_implicit(self, policy: Policy) -> MultiLabel:
+        """
+        Returns (not deep) copy that does not contain the labels for patterns
+        that are marked as not wanting implicit flows by policy
+        """
+        implicit = policy.get_implicit_vulnerabilities()
+
+        return MultiLabel({
+            name: self.labels[name]
+            for name in self.labels if name in implicit
+        })
+
     def __repr__(self) -> str:
         s = f"MultiLabel {{ "
         for lbl in self.labels.values():
@@ -271,6 +283,14 @@ class Policy:
         Returns the vulnerabilities that are being considered
         """
         return list(map(lambda p: p.name, self.patterns))
+
+    def get_implicit_vulnerabilities(self) -> list[str]:
+        """
+        Returns the vulnerabilities that are being considered and are marked
+        as including implicit flows
+        """
+        return list(
+            map(lambda p: p.name, filter(lambda p: p.implicit, self.patterns)))
 
     def get_vulnerability(self, name: str) -> Pattern:
         return list(filter(lambda p: p.name == name, self.patterns))[0]
