@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import sys, json
+from functools import reduce
 
 output_file = sys.argv[1]
 myout_file = sys.argv[2]
@@ -13,9 +14,14 @@ with open(myout_file, "r") as fh:
 
 
 def clean(lst):
+    # Concatenate everything
+    def f(trace):
+        parts = list(map(lambda x: x[0] + str(x[1]), trace))
+        return reduce(lambda a, b: a+b, parts)
+
     for e in lst:
         e["vulnerability"] = e["vulnerability"].split("_")[0]
-        e["sanitized_flows"] = sorted(e["sanitized_flows"], key=len)
+        e["sanitized_flows"] = sorted(e["sanitized_flows"], key=f)
 
     return lst
 

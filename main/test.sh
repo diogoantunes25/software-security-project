@@ -20,7 +20,7 @@ run_test() {
 		timeout $TIMEOUT $run $script $patterns > $myout 2> $log
 		if [ $? -eq 0 ];
 		then
-			./compare $output $myout 
+			./compare $output $myout &>> $log
 			if [ $? -eq 0 ];
 			then
 				echo -e "$GREEN success $ENDCOLOR"

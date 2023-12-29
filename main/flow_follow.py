@@ -102,11 +102,17 @@ class Sanitized(Element):
         self.name = name
         self.lineno = lineno
 
-        # Don't do two sanitizers in a row (TODO: What about f, g, f, g ?)
-        if name == of.name and lineno == of.lineno:
-            self.of = of.of
-        else:
+        if type(of) == Source:
             self.of = of
+            self.used = {(self.name, self.lineno)}
+        else:
+            # If sanitizer already used, don't reuse
+            if (name, lineno) in of.used:
+                self.of = of.of
+                self.used = of.used
+            else:
+                self.of = of
+                self.used = {(name, lineno)}.union(of.used)
 
     def __repr__(self) -> str:
         return f"Sanitized({self.name}@{self.lineno} | {self.of})"
