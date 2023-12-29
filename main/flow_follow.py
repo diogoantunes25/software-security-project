@@ -382,10 +382,10 @@ class MultiLabelling:
         """
         Add multilabel assigned to a given name
         """
-        if variable not in mapping:
+        if variable not in self.mapping:
             self.mapping[variable] = MultiLabel()
 
-        self.mapping[variable].combine(ml)
+        self.mapping[variable] = self.mapping[variable].combine(ml)
 
     def clone(self) -> MultiLabelling:
         """

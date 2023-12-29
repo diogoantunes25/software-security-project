@@ -98,8 +98,34 @@ class IFVisitor():
         new = mtlb.clone()
 
         targets = []
+        rightmost_targets = []
+        left_targets = []
         for target in node.targets:
-            targets += IFVisitor.flat_vars(target)
+            flattened = IFVisitor.flat_vars(target)
+            targets += flattened
+            left_targets += flattened[:-1]
+            rightmost_targets.append(flattened[-1])
+
+        # Add unitialized label if needed to left variables
+        for target in left_targets:
+            if new.mlabel_of(target) is None:
+                mlb = MultiLabel({})
+                for pattern in policy.patterns:
+                    # Create label with single source and no sanitizers
+                    mlb.labels[pattern.name] = Label(pattern.name,
+                                                     set([Source(target, -1)]))
+                logging.debug(f"Pseudo-initialized {target} with {mlb}")
+                new.mlabel_set(target, mlb)
+
+            # TODO: check whether to add or set (in already initialized variables)
+            logging.debug(f"Added {value_mlb} to {target}")
+            new.mlabel_add(target, value_mlb)
+
+        for target in rightmost_targets:
+            logging.debug(f"Set {target} to {value_mlb}")
+            new.mlabel_set(target, value_mlb)
+
+        logging.debug(f"Multilabelling changed to {new}")
 
         for target in targets:
             logging.debug(
@@ -110,8 +136,6 @@ class IFVisitor():
                 f"Saving the following vulnerabilities for {target} - {bad_labels}"
             )
             vulns.save(Element(target, node.lineno), bad_labels)
-
-            new.mlabel_set(target, value_mlb)
 
         logging.debug(f"Multilabelling after assign is {str(new)}")
 
