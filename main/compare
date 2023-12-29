@@ -17,7 +17,7 @@ def clean(lst):
     # Concatenate everything
     def f(trace):
         parts = list(map(lambda x: x[0] + str(x[1]), trace))
-        return reduce(lambda a, b: a+b, parts)
+        return reduce(lambda a, b: a + b, parts)
 
     for e in lst:
         e["vulnerability"] = e["vulnerability"].split("_")[0]
