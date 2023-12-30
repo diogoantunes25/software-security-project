@@ -20,11 +20,24 @@ class IFVisitor():
         Examples:
             - flat_vars(a) = ['a']
             - flat_vars(a.b.c) = ['a', 'b', 'c']
+            - flat_vars(a.b().c) = ['a', 'b()', 'c']
         """
 
-        assert (type(node) == ast.Name or type(node) == ast.Attribute)
-        if type(node) == ast.Name: return [node.id]
-        return IFVisitor.flat_vars(node.value) + [node.attr]
+        assert (type(node) == ast.Name or type(node) == ast.Attribute
+                or type(node) == ast.Call)
+        if type(node) == ast.Name: return [node]
+        elif type(node) == ast.Attribute:
+            return IFVisitor.flat_vars(
+                node.value) + [ast.Name(node.attr, None, lineno=node.lineno)]
+
+        # Call node (intuition is that it turns (a.b.c)() into a.b.(c()) )
+        inside = IFVisitor.flat_vars(node.func)
+        return inside[:-1] + [
+            ast.Call(func=inside[-1],
+                     args=node.args,
+                     keywords=node.keywords,
+                     lineno=node.lineno)
+        ]
 
     def visit(self, node: ast.AST, policy: Policy, mtlb: MultiLabelling,
               vulns: Vulnerability):
@@ -101,7 +114,19 @@ class IFVisitor():
         rightmost_targets = []
         left_targets = []
         for target in node.targets:
-            flattened = IFVisitor.flat_vars(target)
+            flattened_nodes = IFVisitor.flat_vars(target)
+            flattened = []
+            for flat_node in flattened_nodes:
+                if type(flat_node) == ast.Name:
+                    flattened.append(flat_node.id)
+                elif type(flat_node) == ast.Call:
+                    logging.debug(
+                        f"Ignored assignment to funcion return value")
+                else:
+                    raise ValueError(
+                        f"visit_assign: expected flat_node to be either ast.Name or ast.Call, but found {type(flat_node).__name__}"
+                    )
+
             targets += flattened
             left_targets += flattened[:-1]
             rightmost_targets.append(flattened[-1])
@@ -241,27 +266,27 @@ class IFVisitor():
 
     def visit_call(self, node: ast.Call, policy: Policy, mtlb: MultiLabelling,
                    vulns: Vulnerability) -> MultiLabel:
-        vars = IFVisitor.flat_vars(node.func)
-        name = vars[-1]
+        flat_nodes = IFVisitor.flat_vars(node)
 
-        if len(vars) > 1:
+        if len(flat_nodes) > 1:
             # Turn a.b.c() into a + b + c()
-            fake_nodes = list(
-                map(lambda n: ast.Name(n, None, lineno=node.lineno),
-                    vars[:-1]))
-            fake_nodes.append(
-                ast.Call(ast.Name(name, lineno=node.lineno),
-                         node.args,
-                         node.keywords,
-                         lineno=node.lineno))
+            # Don't recall why I did this
+            # fake_nodes.append(
+            #     ast.Call(ast.Name(name, lineno=node.lineno),
+            #              node.args,
+            #              node.keywords,
+            #              lineno=node.lineno))
             fake_sum = functools.reduce(
                 lambda a, b: ast.BinOp(
                     left=a, op=ast.Add(), right=b, lineno=node.lineno),
-                fake_nodes)
+                flat_nodes)
             logging.debug(
-                f"Reduced {ast.dump(node)} into {ast.dump(fake_sum)}")
+                f"Reduced {ast.dump(node)} into {list(map(ast.dump, flat_nodes))}"
+            )
             return self.visit(fake_sum, policy, mtlb, vulns)
 
+        logging.info(f"vars is {list(map(ast.dump, flat_nodes))}")
+        name = flat_nodes[-1].func.id
         # Merge all multilabels of the arguments
         mlb = self.current_context()
         for arg in node.args:
