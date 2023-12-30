@@ -83,6 +83,12 @@ class IFVisitor():
         elif type(node) == ast.Pass:
             return self.visit_pass(node, policy, mtlb, vulns)
 
+        elif type(node) == ast.For:
+            return self.visit_for(node, policy, mtlb, vulns)
+
+        elif type(node) == ast.AugAssign:
+            return self.visit_aug_assign(node, policy, mtlb, vulns)
+
         else:
             raise ValueError(
                 f"Unknown (or Unsupported) AST node - {type(node)}")
@@ -285,7 +291,7 @@ class IFVisitor():
             )
             return self.visit(fake_sum, policy, mtlb, vulns)
 
-        logging.info(f"vars is {list(map(ast.dump, flat_nodes))}")
+        logging.debug(f"vars is {list(map(ast.dump, flat_nodes))}")
         name = flat_nodes[-1].func.id
         # Merge all multilabels of the arguments
         mlb = self.current_context()
@@ -379,9 +385,9 @@ class IFVisitor():
                      mtlb: MultiLabelling, vulns: Vulnerability) -> MultiLabel:
 
         left = self.visit(node.left, policy, mtlb, vulns)
-        logging.info(f"left of binary node: {str(left)}")
+        logging.debug(f"left of binary node: {str(left)}")
         right = self.visit(node.right, policy, mtlb, vulns)
-        logging.info(f"right of binary node: {str(right)}")
+        logging.debug(f"right of binary node: {str(right)}")
 
         return left.combine(right)
 
@@ -393,13 +399,13 @@ class IFVisitor():
         # hand side (so this is to be handled as a binary operation)
 
         value_lbl = self.visit(node.value, policy, mtlb, vulns)
-        logging.info(f"value of attribute node: {str(value_lbl)}")
+        logging.debug(f"value of attribute node: {str(value_lbl)}")
 
         # I want to handle the attribute as variable, so instead of copying code,
         # create a fake Name node
         fake_node = ast.Name(node.attr, None)
         attr_lbl = self.visit(fake_node, policy, mtlb, vulns)
-        logging.info(f"attr of attribute node: {str(attr_lbl)}")
+        logging.debug(f"attr of attribute node: {str(attr_lbl)}")
 
         return value_lbl.combine(attr_lbl)
 
@@ -420,5 +426,56 @@ class IFVisitor():
     def visit_pass(self, node: ast.UnaryOp, policy: Policy,
                    mtlb: MultiLabelling,
                    vulns: Vulnerability) -> MultiLabelling:
-
         return mtlb
+
+    def visit_aug_assign(self, node: ast.UnaryOp, policy: Policy,
+                         mtlb: MultiLabelling,
+                         vulns: Vulnerability) -> MultiLabelling:
+
+        # The following equivalence is used
+        # target op= value
+        # is taken as equivalent to
+        # target = value op target
+
+        value = ast.BinOp(left=node.value,
+                          op=node.op,
+                          right=node.target,
+                          lineno=node.lineno)
+        assign = ast.Assign(targets=[node.target],
+                            value=value,
+                            lineno=node.lineno)
+        return self.visit(assign, policy, mtlb, vulns)
+
+    def visit_for(self, node: ast.For, policy: Policy, mtlb: MultiLabelling,
+                  vulns: Vulnerability) -> MultiLabelling:
+
+        # For information flow purposes, the following are equivalent
+        # for target in iter:
+        #   body
+        #
+        # while not iter.ended():
+        #   target = iter.next()
+        #   body
+        #
+        # Since `ended` and `next` would be considered as undefined and thus
+        # look as illegal flows, they are omitted and the expression is further
+        # simplified
+        #
+        # while not iter:
+        #   target = iter
+        #   body
+
+        test_node = ast.UnaryOp(op=ast.Not(),
+                                operand=node.iter,
+                                lineno=node.iter.lineno)
+        assign_node = ast.Assign(targets=[node.target],
+                                 value=node.iter,
+                                 lineno=node.iter.lineno)
+        body_node = [assign_node] + node.body
+
+        while_node = ast.While(test=test_node, body=body_node)
+
+        logging.debug(
+            f"Converted {ast.dump(node)} into {ast.dump(while_node)}")
+
+        return self.visit(while_node, policy, mtlb, vulns)
