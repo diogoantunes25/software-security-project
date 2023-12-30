@@ -3,6 +3,8 @@ from flow_follow import *
 import logging
 import functools
 
+# Whether to detect termination leaks or not
+TERMINATION_LEAK=False
 
 class IFVisitor():
 
@@ -333,7 +335,10 @@ class IFVisitor():
 
         logging.debug(f"Call for {name} has final multilabel of {str(mlb)}")
 
-        return mlb
+        # Must combine with current context after complete evaluation
+        # (because sanitized results must be recombined with context, which
+        # can't be sanitized)
+        return mlb.combine(self.current_context())
 
     def visit_while(self, node: ast.While, policy: Policy,
                     mtlb: MultiLabelling,
@@ -381,7 +386,8 @@ class IFVisitor():
 
         # leave as context the aggregate multilabel (encodes all possible values
         # that were in the condition and that taint everything because of loop termination)
-        self.contexts.append(aggregate_cond_mlb.filter_implicit(policy))
+        if TERMINATION_LEAK:
+            self.contexts.append(aggregate_cond_mlb.filter_implicit(policy))
 
         return mtlb
 

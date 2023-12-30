@@ -502,7 +502,8 @@ class Vulnerability:
                 if len(trace) == 0:
                     empty = True
                 else:
-                    d["sanitized_flows"].append(trace[::-1])
+                    if trace[::-1] not in d["sanitized_flows"]:
+                        d["sanitized_flows"].append(trace[::-1])
 
             d["unsanitized_flows"] = "yes" if empty else "no"
             ans.append(d)
