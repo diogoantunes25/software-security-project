@@ -15,12 +15,12 @@ class IFVisitor():
 
     def flat_vars(node: ast.AST) -> list[str]:
         """
-        Receives either a name or an attribute and returns the list 
-        of names.
+        Receives an attribute chain (all elements are either names, attributes or calls)
+        and returns the list of decomposed values.
         Examples:
-            - flat_vars(a) = ['a']
-            - flat_vars(a.b.c) = ['a', 'b', 'c']
-            - flat_vars(a.b().c) = ['a', 'b()', 'c']
+            - flat_vars(a) = [a]
+            - flat_vars(a.b.c) = [a, b, c]
+            - flat_vars(a.b().c) = [a, b(), c]
         """
 
         assert (type(node) == ast.Name or type(node) == ast.Attribute
@@ -148,9 +148,13 @@ class IFVisitor():
                 logging.debug(f"Pseudo-initialized {target} with {mlb}")
                 new.mlabel_set(target, mlb)
 
-            # TODO: check whether to add or set (in already initialized variables)
-            logging.debug(f"Added {value_mlb} to {target}")
-            new.mlabel_add(target, value_mlb)
+                logging.debug(f"Added {value_mlb} to {target}")
+                new.mlabel_add(target, value_mlb)
+
+            else:
+                # TODO: check whether to add or set (in already initialized variables)
+                logging.debug(f"Added {value_mlb} to {target}")
+                new.mlabel_set(target, value_mlb)
 
         for target in rightmost_targets:
             logging.debug(f"Set {target} to {value_mlb}")
