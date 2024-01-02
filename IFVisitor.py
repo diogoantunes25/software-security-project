@@ -1,10 +1,9 @@
-import ast
+import ast, os
 from flow_follow import *
 import logging
 import functools
 
-# Whether to detect termination leaks or not
-TERMINATION_LEAK=False
+TERMINATION_LEAK='TERMINATION_LEAK' in os.environ
 
 class IFVisitor():
 

@@ -1,9 +1,11 @@
 # Software Security project
 
-// TODO: explain what "extra features" we have
-- implicit flow detection (see tests x, y, z)
-- for loops and aug assign (see tests i, j, k)
-- sanitization order detection (see tests, a, b, c)
+This project includes the following "extra features"
+- Termination leak detection (see tests `4a` and `4b`). Note that this is disabled
+by default, as it would make one of the official tests fail. To activate run `export TERMINATION_LEAK`
+- For loop support (see tests `7a`, `7b` and `7c`)
+- Aug assign support (see test `8a`)
+- Reporting of sanitization order, not only occurrence
 
 ## Usage and development
 
