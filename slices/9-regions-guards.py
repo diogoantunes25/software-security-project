@@ -1,14 +1,14 @@
-a=b('ola')
-c=d('oi')
-i=""
-while (a != "") :
-    f = s(c,0,1)
+a = b('ola')
+c = d('oi')
+i = ""
+while (a != ""):
+    f = s(c, 0, 1)
 
-    if (f=="a") :
+    if (f == "a"):
         i = i + "'"
-    else :
+    else:
         i = i + " "
-    a = s(a,1)
-z(0,i)
+    a = s(a, 1)
+z(0, i)
 
 # tip: implicit flows can come from any of the nested conditions/loops

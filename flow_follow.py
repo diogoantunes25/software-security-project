@@ -58,15 +58,15 @@ class Element:
     def __repr__(self) -> str:
         return f"{self.name}@{self.lineno}"
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if isinstance(other, Element):
             return self.name == other.name and self.lineno == other.lineno
         return False
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.name) ^ hash(self.lineno)
 
-    def clone(self):
+    def clone(self) -> Self:
         return Element(self.name, self.lineno)
 
 
@@ -81,15 +81,15 @@ class Source(Element):
     def get_source(self) -> Source:
         return self
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.name) ^ hash(self.lineno)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if not isinstance(other, Source):
             return False
         return self.name == other.name and self.lineno == other.lineno
 
-    def clone(self):
+    def clone(self) -> Self:
         return Source(self.name, self.lineno)
 
 
@@ -120,15 +120,15 @@ class Sanitized(Element):
     def get_source(self) -> Source:
         return self.of.get_source()
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.name) ^ hash(self.lineno) ^ hash(self.of)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if not isinstance(other, Sanitized):
             return False
         return self.name == other.name and self.lineno == other.lineno and self.of == other.of
 
-    def clone(self):
+    def clone(self) -> Self:
         return Sanitized(self.name, self.lineno, self.of.clone())
 
 
@@ -178,7 +178,7 @@ class Label:
         assert (self.pattern == other.pattern)
         return Label(self.pattern, self.values.union(other.values))
 
-    def clone(self) -> Label:
+    def clone(self) -> Self:
         """
         Returns deep copy (immutable, not deep copy needed)
         """
@@ -218,7 +218,7 @@ class MultiLabel:
                 return False
         return True
 
-    def get_labels(self):
+    def get_labels(self) -> dict[str, Label]:
         return self.labels
 
     def get_label(self, pattern: str) -> Label:

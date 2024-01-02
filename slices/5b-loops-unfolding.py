@@ -1,11 +1,11 @@
-a=b('username')
-c=""
-d=""
-while (e == "") :
+a = b('username')
+c = ""
+d = ""
+while (e == ""):
     c = d
-    if (x == 42) :
+    if (x == 42):
         d = a
-    a = s(a+1)
-q=z(c)
+    a = s(a + 1)
+q = z(c)
 
-# tip: different control paths, via number of loops, might encode or not different vulnerablities. 
+# tip: different control paths, via number of loops, might encode or not different vulnerablities.

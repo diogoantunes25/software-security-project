@@ -23,7 +23,6 @@ def load_policy(filename: str) -> Policy:
 
 def main(slice: str, patterns: str):
     tree = load_tree(slice)
-    print(ast.dump(tree, indent=4), file=sys.stderr)
     policy = load_policy(patterns)
 
     mtlb = MultiLabelling({})
@@ -36,8 +35,8 @@ def main(slice: str, patterns: str):
 
 
 if __name__ == "__main__":
-    # logging.basicConfig(level=logging.INFO, filename="log.log", filemode="w")
-    logging.basicConfig(level=logging.DEBUG)
+    # logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO, filename="log.log", filemode="w")
 
     parser = argparse.ArgumentParser(
         prog='py_analyser',
@@ -47,7 +46,6 @@ if __name__ == "__main__":
 
     parser.add_argument('slice')
     parser.add_argument('patterns')
-
     args = parser.parse_args()
 
     main(args.slice, args.patterns)

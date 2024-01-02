@@ -3,12 +3,17 @@ from flow_follow import *
 import logging
 import functools
 
-TERMINATION_LEAK='TERMINATION_LEAK' in os.environ
+TERMINATION_LEAK = 'TERMINATION_LEAK' in os.environ
+
 
 class IFVisitor():
+    """
+    Information Flow Visitor. Visits AST and keeps track of multilabelling of
+    variables.
+    """
 
     def __init__(self):
-        # Context multilabel used for conditionals
+        # Context multilabel used for conditionals and loops
         self.contexts = [MultiLabel({})]
 
     def current_context(self):
@@ -92,7 +97,7 @@ class IFVisitor():
 
         else:
             raise ValueError(
-                f"Unknown (or Unsupported) AST node - {type(node)}")
+                f"Unknown (or Unsupported) AST node - {type(node).__name__}")
 
     def visit_multiple(self, nodes: list[ast.AST], policy: Policy,
                        mtlb: MultiLabelling,
