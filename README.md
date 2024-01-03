@@ -3,7 +3,7 @@
 This project includes the following "extra features"
 - Termination leak detection (see tests `4a` and `4b`). Note that this is disabled
 by default, as it would make one of the official tests fail. To activate run `export TERMINATION_LEAK`
-- For loop support (see tests `7a`, `7b` and `7c`)
+- For loop support (see tests `7a`, `7b`, `7c` and `7d`)
 - Aug assign support (see test `8a`)
 - Reporting of sanitization order, not only occurrence
 
