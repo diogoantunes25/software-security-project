@@ -6,6 +6,7 @@ by default, as it would make one of the official tests fail. To activate run `ex
 - For loop support (see tests `7a`, `7b`, `7c` and `7d`)
 - Aug assign support (see test `8a`)
 - Reporting of sanitization order, not only occurrence
+- Multiple assigns (see test `10a`)
 
 ## Usage and development
 
