@@ -1,0 +1,28 @@
+[
+    {
+        "vulnerability": "A_1",
+        "source": [
+            "a1",
+            1
+        ],
+        "sink": [
+            "c",
+            3
+        ],
+        "sanitized_flows": [],
+        "unsanitized_flows": "yes"
+    },
+    {
+        "vulnerability": "A_2",
+        "source": [
+            "a2",
+            2
+        ],
+        "sink": [
+            "c",
+            3
+        ],
+        "sanitized_flows": [],
+        "unsanitized_flows": "yes"
+    }
+]

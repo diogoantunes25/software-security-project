@@ -154,13 +154,10 @@ class IFVisitor():
                 logging.debug(f"Pseudo-initialized {target} with {mlb}")
                 new.mlabel_set(target, mlb)
 
-                logging.debug(f"Added {value_mlb} to {target}")
-                new.mlabel_add(target, value_mlb)
-
-            else:
-                # TODO: check whether to add or set (in already initialized variables)
-                logging.debug(f"Added {value_mlb} to {target}")
-                new.mlabel_set(target, value_mlb)
+            # If the value is not the rightmost, the label should be added and not
+            # replace the current one
+            logging.debug(f"Added {value_mlb} to {target}")
+            new.mlabel_add(target, value_mlb)
 
         for target in rightmost_targets:
             logging.debug(f"Set {target} to {value_mlb}")
