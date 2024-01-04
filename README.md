@@ -5,7 +5,7 @@ This project includes the following "extra features"
 by default, as it would make one of the official tests fail. To activate run `export TERMINATION_LEAK`
 - For loop support (see tests `7a`, `7b`, `7c` and `7d`)
 - Aug assign support (see test `8a`)
-- Reporting of sanitization order, not only occurrence
+- Reporting of sanitization order, not only occurrence (see tests `6c` through `6j`)
 - Multiple assigns (see test `10a`)
 
 ## Usage and development
