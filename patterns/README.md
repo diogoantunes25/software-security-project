@@ -13,7 +13,9 @@ Detects flows from values in the HTTP request (provided by flask) into shell cal
 The considered sinks are the following:
 
 From `subprocess`: `call`, `check_call`, `check_output`, `run`, `Popen`, `getstatusoutput`, `getoutput`
+
 From `os`: `system`, `posix_spawn`, `posix_spawnp`, `spawnl`, `spawnle`, `spawnlp`, `spawnlpe`, `spawnv`, `spawnve`, `spawnvp`, `spawnvpe`, `startfile`, `popen`
+
 From `popen2`: `popen2`, `popen3`, `popen4`, `Popen3`, `Popen4`
 
 ---
