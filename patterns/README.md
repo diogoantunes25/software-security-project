@@ -36,9 +36,16 @@ Sinks:
 - where is `filter` defined?
 - where is `where` defined?
 
-## [Django] SQL Injection - raw SQL
+## [Django/] SQL Injection - raw SQL
 
-// TODO
+In Django, the request variable doesn't have a fixed name (as in Flask). This
+means, the name that are presented are the likely variable name (`request`, `req`, `r`, `http_request`, `user_request` will be used)
+
+Django uses most of the time an ORM, which means that usually there won't be 
+SQL Injections. However, there are situations where the ORM is not a good fit,
+so Django provides support for executing SQL statements directly, which is using
+`RawSQL`, `raw` and `execute`. Sometimes `handy` might also be used (so `handy`'s
+database related functions are also considered as sinks)
 
 ## [Flask] Command Injection
 
@@ -59,6 +66,7 @@ files.
 
 Sanitizers:
 - `os.path.normpath`
+- `secure_filename`: CHECK (from `werkzeug.utils`)
 // TODO
 
 Sinks:
@@ -67,6 +75,31 @@ Sinks:
 - Functions from `os` module: `chdir`, `access`, `chflags`, `chmod`, `chown`, `chroot`, `lchflags`, `lchmod`, `lchown`, `link`, `listdir`, `lstat`, `mkdir`, `makedirs`, `mkfifo`, `mknod`, `remove`, `removedirs`, `rename`, `renames`, `replace`, `rmdir`, `stat`, `symlink`, `truncate`, `unlink`, `getxattr`, `listxattr`, `removexattr`, `setxattr`
 - Functions from `os.path` module: `exists`, `lexists`, `getatime`, `getmtime`, `getctime`, `getsize`
 - Functions from `pathlib` module: `Path`, `PurePath`, `PurePosixPath`, `PosixPath`, `PureWindowsPath`, `WindowsPath` // TODO: might make sense to add more
+
+## [Flask] XSS
+
+Detects flows from values in the HTTP request of one user (provided by flask) into objects
+that will be rendered by other users
+
+Sanitizers:
+- `Markup.escape`
+
+Sinks:
+- `render_template`
+- `Markup`
+
+## [Flask/pickle] Deserialization of untrusted data
+
+The sinks are taken from the `pickle` python module
+
+// TODO: check if I don't want implicit flows (I don't think I do)
+
+## [Flask/pickle] Unvalidated redirects
+
+Here, the entire `request` object is considered as a source. However, this 
+would result in most redirects being flagged with a vulnerability.
+
+// TODO: solve problem of too many positives
 
 ---
 
@@ -77,3 +110,5 @@ Sinks:
 - [`subprocess` docs](https://docs.python.org/3/library/subprocess.html#module-subprocess)
 - [`os` docs](https://docs.python.org/3/library/os.html#)
 - [`popen2` docs](https://python.readthedocs.io/en/v2.7.2/library/popen2.html#module-popen2)
+- [`handy` database related function docs](https://handy.readthedocs.io/en/latest/db.html)
+- Djangos's [raw queries](https://docs.djangoproject.com/en/dev/topics/db/sql/#executing-raw-queries) and [direct custom SQL](https://docs.djangoproject.com/en/dev/topics/db/sql/#executing-custom-sql)

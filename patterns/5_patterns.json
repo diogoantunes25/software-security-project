@@ -2,7 +2,7 @@
     {
         "vulnerability": "[SQLAlchemy/Flask] SQL Injection 1",
         "sources": [
-            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args"
+            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files"
         ],
         "sanitizers": [
             ""
@@ -15,7 +15,7 @@
     {
         "vulnerability": "[SQLAlchemy/Flask] SQL Injection 2",
         "sources": [
-            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args"
+            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files"
         ],
         "sanitizers": [
             ""
@@ -28,18 +28,22 @@
     {
         "vulnerability": "[Django] SQL Injection",
         "sources": [
+            "request", "req", "r", "http_request", "user_request"
         ],
         "sanitizers": [
             ""
         ],
         "sinks": [
+            "RawSQL", "raw", "execute", "callproc",
+            "fetch_all", "fetch_row", "fetch_col", "fetch_val", "do_sql", "fetch_dicts", "fetch_dict", "fetch_named", "fetch_named_row"
         ],
         "implicit": "yes"
     },
     {
-        "vulnerability": "[Flask] Command Injection",
+        "vulnerability": "[Flask/Django] Command Injection",
         "sources": [
-            "get", "form"
+            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files",
+            "request", "req", "r", "http_request", "user_request"
         ],
         "sanitizers": [
             ""
@@ -52,9 +56,10 @@
         "implicit": "yes"
     },
     {
-        "vulnerability": "[Flask] Path Traversal",
+        "vulnerability": "[Flask/Django] Path Traversal",
         "sources": [
-            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args"
+            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files",
+            "request", "req", "r", "http_request", "user_request"
         ],
         "sanitizers": [
             "normpath"
@@ -69,15 +74,43 @@
         "implicit": "yes"
     },
     {
-        "vulnerability": "[?] XSS",
+        "vulnerability": "[Flask] XSS",
         "sources": [
+            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files"
         ],
         "sanitizers": [
             ""
         ],
         "sinks": [
+            "render_template", "Markup", "make_response", "Response", "Raw"
+        ],
+        "implicit": "yes"
+    },
+    {
+        "vulnerability": "[Flask/Django] Deserialization of untrusted data",
+        "sources": [
+            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files",
+            "request", "req", "r", "http_request", "user_request"
+        ],
+        "sanitizers": [
+            ""
+        ],
+        "sinks": [
+            "loads", "load"
+        ],
+        "implicit": "no"
+    },
+    {
+        "vulnerability": "[Flask] Unvalidated Redirects",
+        "sources": [
+            "request"
+        ],
+        "sanitizers": [
+            ""
+        ],
+        "sinks": [
+            "redirect"
         ],
         "implicit": "yes"
     }
-
 ]
