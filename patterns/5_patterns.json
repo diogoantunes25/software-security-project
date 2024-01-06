@@ -1,27 +1,38 @@
 [
     {
-        "vulnerability": "[SQLAlchemy/Flask] SQL Injection - raw SQL",
+        "vulnerability": "[SQLAlchemy/Flask] SQL Injection 1",
         "sources": [
-            "get", "form"
+            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args"
         ],
         "sanitizers": [
             ""
         ],
         "sinks": [
-            "execute"
+            "execute", "from_statement", "text"
         ],
         "implicit": "yes"
     },
     {
-        "vulnerability": "[SQLAlchemy/Flask] SQL Injection - partial",
+        "vulnerability": "[SQLAlchemy/Flask] SQL Injection 2",
         "sources": [
-            "get", "form"
+            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args"
         ],
         "sanitizers": [
             ""
         ],
         "sinks": [
-            "filter"
+            "filter", "where"
+        ],
+        "implicit": "yes"
+    },
+    {
+        "vulnerability": "[Django] SQL Injection",
+        "sources": [
+        ],
+        "sanitizers": [
+            ""
+        ],
+        "sinks": [
         ],
         "implicit": "yes"
     },
@@ -41,13 +52,19 @@
         "implicit": "yes"
     },
     {
-        "vulnerability": "[?] Path Traversal",
+        "vulnerability": "[Flask] Path Traversal",
         "sources": [
+            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args"
         ],
         "sanitizers": [
-            ""
+            "normpath"
         ],
         "sinks": [
+            "copyfile", "copymode", "copystat", "copy", "copy2", "copytree", "rmtree", "move", "disk_usage", "chown", 
+            "open",
+            "chdir", "access", "chflags", "chmod", "chown", "chroot", "lchflags", "lchmod", "lchown", "link", "listdir", "lstat", "mkdir", "makedirs", "mkfifo", "mknod", "remove", "removedirs", "rename", "renames", "replace", "rmdir", "stat", "symlink", "truncate", "unlink", "getxattr", "listxattr", "removexattr", "setxattr",
+            "exists", "lexists", "getatime", "getmtime", "getctime", "getsize",
+            "Path", "PurePath", "PurePosixPath", "PosixPath", "PureWindowsPath", "WindowsPath"
         ],
         "implicit": "yes"
     },
