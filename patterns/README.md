@@ -7,7 +7,7 @@ Available:
 - [ ] [Django] SQL Injection
 - [x] [Flask/Django] Command Injection
 - [ ] [Flask/Django] Path traversal
-- [ ] [Flask/Django] Deserialization of untrusted data
+- [x] [Flask/Django] Deserialization of untrusted data
 - [ ] [Flask] Unvalidated Redirects
 
 
@@ -88,23 +88,11 @@ Sinks:
 - Functions from `os.path` module: `exists`, `lexists`, `getatime`, `getmtime`, `getctime`, `getsize`
 - Functions from `pathlib` module: `Path`, `PurePath`, `PurePosixPath`, `PosixPath`, `PureWindowsPath`, `WindowsPath` // TODO: might make sense to add more
 
-## [Flask] XSS
-
-Detects flows from values in the HTTP request of one user (provided by flask) into objects
-that will be rendered by other users
-
-Sanitizers:
-- `Markup.escape`
-
-Sinks:
-- `render_template`
-- `Markup`
-
 ## [Flask/pickle] Deserialization of untrusted data
 
 The sinks are taken from the `pickle` python module.
 
-// TODO: check if I don't want implicit flows (I don't think I do)
+No sanitizers were found for this problem.
 
 ## [Flask/pickle] Unvalidated redirects
 
