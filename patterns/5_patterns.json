@@ -1,0 +1,66 @@
+[
+    {
+        "vulnerability": "[SQLAlchemy/Flask] SQL Injection - raw SQL",
+        "sources": [
+            "get", "form"
+        ],
+        "sanitizers": [
+            ""
+        ],
+        "sinks": [
+            "execute"
+        ],
+        "implicit": "yes"
+    },
+    {
+        "vulnerability": "[SQLAlchemy/Flask] SQL Injection - partial",
+        "sources": [
+            "get", "form"
+        ],
+        "sanitizers": [
+            ""
+        ],
+        "sinks": [
+            "filter"
+        ],
+        "implicit": "yes"
+    },
+    {
+        "vulnerability": "[Flask] Command Injection",
+        "sources": [
+            "get", "form"
+        ],
+        "sanitizers": [
+            ""
+        ],
+        "sinks": [
+            "call", "check_call", "check_output", "run", "Popen", "getstatusoutput", "getoutput",
+            "system", "posix_spawn", "posix_spawnp", "spawnl", "spawnle", "spawnlp", "spawnlpe", "spawnv", "spawnve", "spawnvp", "spawnvpe", "startfile", "popen",
+            "popen2", "popen3", "popen4", "Popen3", "Popen4"
+        ],
+        "implicit": "yes"
+    },
+    {
+        "vulnerability": "[?] Path Traversal",
+        "sources": [
+        ],
+        "sanitizers": [
+            ""
+        ],
+        "sinks": [
+        ],
+        "implicit": "yes"
+    },
+    {
+        "vulnerability": "[?] XSS",
+        "sources": [
+        ],
+        "sanitizers": [
+            ""
+        ],
+        "sinks": [
+        ],
+        "implicit": "yes"
+    }
+
+]
