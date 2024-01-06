@@ -46,12 +46,13 @@
             "request", "req", "r", "http_request", "user_request"
         ],
         "sanitizers": [
-            ""
+            "quote"
         ],
         "sinks": [
             "call", "check_call", "check_output", "run", "Popen", "getstatusoutput", "getoutput",
             "system", "posix_spawn", "posix_spawnp", "spawnl", "spawnle", "spawnlp", "spawnlpe", "spawnv", "spawnve", "spawnvp", "spawnvpe", "startfile", "popen",
-            "popen2", "popen3", "popen4", "Popen3", "Popen4"
+            "popen2", "popen3", "popen4", "Popen3", "Popen4",
+            "create_subprocess_exec", "create_subprocess_shell"
         ],
         "implicit": "yes"
     },
@@ -71,20 +72,7 @@
             "exists", "lexists", "getatime", "getmtime", "getctime", "getsize",
             "Path", "PurePath", "PurePosixPath", "PosixPath", "PureWindowsPath", "WindowsPath"
         ],
-        "implicit": "yes"
-    },
-    {
-        "vulnerability": "[Flask] XSS",
-        "sources": [
-            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files"
-        ],
-        "sanitizers": [
-            ""
-        ],
-        "sinks": [
-            "render_template", "Markup", "make_response", "Response", "Raw"
-        ],
-        "implicit": "yes"
+        "implicit": "no"
     },
     {
         "vulnerability": "[Flask/Django] Deserialization of untrusted data",
@@ -111,6 +99,6 @@
         "sinks": [
             "redirect"
         ],
-        "implicit": "yes"
+        "implicit": "no"
     }
 ]

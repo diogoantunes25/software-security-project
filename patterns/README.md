@@ -1,5 +1,16 @@
 # Patterns
 
+Available:
+
+- [ ] [SQLAlchemy/Flask] SQL Injection 1
+- [ ] [SQLAlchemy/Flask] SQL Injection 2
+- [ ] [Django] SQL Injection
+- [x] [Flask/Django] Command Injection
+- [ ] [Flask/Django] Path traversal
+- [ ] [Flask/Django] Deserialization of untrusted data
+- [ ] [Flask] Unvalidated Redirects
+
+
 ## [SQL Alchemy/Flask] SQL Injection 1
 
 Detects flows from values in the request (provided by flask) into raw database
@@ -53,11 +64,12 @@ Detects flows from values in the HTTP request (provided by flask) into shell cal
 (using either the `subprocess` module, the `os` module, and the `popen2` module).
 The considered sinks are the following:
 
-From `subprocess`: `call`, `check_call`, `check_output`, `run`, `Popen`, `getstatusoutput`, `getoutput`
+- from `subprocess`: `call`, `check_call`, `check_output`, `run`, `Popen`, `getstatusoutput`, `getoutput`
+- from `os`: `system`, `posix_spawn`, `posix_spawnp`, `spawnl`, `spawnle`, `spawnlp`, `spawnlpe`, `spawnv`, `spawnve`, `spawnvp`, `spawnvpe`, `startfile`, `popen`
+- from `popen2`: `popen2`, `popen3`, `popen4`, `Popen3`, `Popen4`
+- from `asyncio`: `create_subprocess_exec` and `create_subprocess_shell`
 
-From `os`: `system`, `posix_spawn`, `posix_spawnp`, `spawnl`, `spawnle`, `spawnlp`, `spawnlpe`, `spawnv`, `spawnve`, `spawnvp`, `spawnvpe`, `startfile`, `popen`
-
-From `popen2`: `popen2`, `popen3`, `popen4`, `Popen3`, `Popen4`
+The sanitizers that can be used are `shlex.quote`.
 
 ## [Flask] Path traversal
 
@@ -90,7 +102,7 @@ Sinks:
 
 ## [Flask/pickle] Deserialization of untrusted data
 
-The sinks are taken from the `pickle` python module
+The sinks are taken from the `pickle` python module.
 
 // TODO: check if I don't want implicit flows (I don't think I do)
 
