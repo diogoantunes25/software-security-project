@@ -84,7 +84,7 @@ files.
 
 The sanitizers considered are:
 - `os.path.normpath`, `os.path.commonpath`
-- `werkzeug.secure_filename`,
+- `werkzeug.secure_filename` and `werkzeug.security.safe_join`
 - `sanitize_filename.sanitize`
 -  functions from `pathvalidate`: `sanitize_filename`, `sanitize_filepath`, `replace_symbol`
 

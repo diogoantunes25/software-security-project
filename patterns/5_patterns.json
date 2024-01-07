@@ -64,7 +64,7 @@
         ],
         "sanitizers": [
             "normpath", "commonpath",
-            "secure_filename",
+            "secure_filename", "safe_join",
             "sanitize",
             "sanitize_filename", "sanitize_filepath", "replace_symbol"
         ],
