@@ -20,11 +20,15 @@ SQL Injections. However, there are situations where the ORM is not a good fit,
 so Django provides support for executing SQL statements directly, which is using
 `RawSQL`, `raw` and `execute`. Sometimes `handy` might also be used (so `handy`'s
 database related functions are also considered as sinks). Note another database driver
-that not `pycopg2` might being used (for example `mysql` - for this driver the
+that not `pycopg2` might being used (for example `MySQL Connector` - for this driver the
 method to execute the SQL command is the same, so no source is added).
 
 The sanitizers considered are `psycopg2.mogrify`, `psycopg2.sql.SQL.format` (when `psycopg2`
-is being used) and `mysql.connection.connector.escape_string` (for `mysql`).
+is being used) and `mysql.connection.connector.escape_string` (for `MySQL Connector`).
+
+Other drivers can be considered (check [docs here](https://docs.djangoproject.com/en/5.0/ref/databases/#mariadb-notes)),
+but aren't added because it would be analogous and for demonstration purpose
+has no added value.
 
 ## [Flask] Command Injection
 

@@ -5,7 +5,8 @@
             "request", "req", "r", "http_request", "user_request"
         ],
         "sanitizers": [
-            "mogrify", "format", "escape_string"
+            "mogrify", "format",
+            "escape_string"
         ],
         "sinks": [
             "RawSQL", "raw", "execute", "callproc",
