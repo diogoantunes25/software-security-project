@@ -6,7 +6,7 @@ Available:
 - [ ] [SQLAlchemy/Flask] SQL Injection 2
 - [x] [Django] SQL Injection
 - [x] [Flask/Django] Command Injection
-- [ ] [Flask/Django] Path traversal
+- [x] [Flask/Django] Path traversal
 - [x] [Flask/Django] Deserialization of untrusted data
 - [ ] [Flask] Unvalidated Redirects
 
@@ -82,12 +82,13 @@ The sanitizers that can be used are `shlex.quote`.
 Detects flows from values in the HTTP request (provided by flask) into actions on
 files.
 
-Sanitizers:
-- `os.path.normpath`
-- `secure_filename`: CHECK (from `werkzeug.utils`)
-// TODO
+The sanitizers considered are:
+- `os.path.normpath`, `os.path.commonpath`
+- `werkzeug.secure_filename`,
+- `sanitize_filename.sanitize`
+-  functions from `pathvalidate`: `sanitize_filename`, `sanitize_filepath`, `replace_symbol`
 
-Sinks:
+The sinks considered will be any functions that perform actions based on filepaths:
 - Functions from `shutil` module: `copyfile`, `copymode`, `copystat`, `copy`, `copy2`, `copytree`, `rmtree`, `move`, `disk_usage`, `chown`
 - `open`
 - Functions from `os` module: `chdir`, `access`, `chflags`, `chmod`, `chown`, `chroot`, `lchflags`, `lchmod`, `lchown`, `link`, `listdir`, `lstat`, `mkdir`, `makedirs`, `mkfifo`, `mknod`, `remove`, `removedirs`, `rename`, `renames`, `replace`, `rmdir`, `stat`, `symlink`, `truncate`, `unlink`, `getxattr`, `listxattr`, `removexattr`, `setxattr`
@@ -119,3 +120,5 @@ would result in most redirects being flagged with a vulnerability.
 - [`handy` database related function docs](https://handy.readthedocs.io/en/latest/db.html)
 - Djangos's [raw queries](https://docs.djangoproject.com/en/dev/topics/db/sql/#executing-raw-queries) and [direct custom SQL](https://docs.djangoproject.com/en/dev/topics/db/sql/#executing-custom-sql)
 - [MySQL driver docs](https://dev.mysql.com/doc/connector-python/en/connector-python-examples.html)
+- [`sanitize-filename` package](https://pypi.org/project/sanitize-filename/)
+- [Usage of `os.path.commonpath` to check is path is safe](https://security.openstack.org/guidelines/dg_using-file-paths.html)

@@ -63,7 +63,10 @@
             "request", "req", "r", "http_request", "user_request"
         ],
         "sanitizers": [
-            "normpath"
+            "normpath", "commonpath",
+            "secure_filename",
+            "sanitize",
+            "sanitize_filename", "sanitize_filepath", "replace_symbol"
         ],
         "sinks": [
             "copyfile", "copymode", "copystat", "copy", "copy2", "copytree", "rmtree", "move", "disk_usage", "chown", 
