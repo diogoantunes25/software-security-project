@@ -2,50 +2,12 @@
 
 Available:
 
-- [ ] [SQLAlchemy/Flask] SQL Injection 1
-- [ ] [SQLAlchemy/Flask] SQL Injection 2
 - [x] [Django] SQL Injection
 - [x] [Flask/Django] Command Injection
 - [x] [Flask/Django] Path traversal
 - [x] [Flask/Django] Deserialization of untrusted data
-- [ ] [Flask] Unvalidated Redirects
+- [x] [Flask] Unvalidated Redirects
 
-
-## [SQL Alchemy/Flask] SQL Injection 1
-
-Detects flows from values in the request (provided by flask) into raw database
-functions (using SQL Alchemy)
-
-The sources are functions/variables whose value are taken from the HTTP request
-(i.e. user controlled):
-
-- Methods/attributes of `request` object (didn't include `request`, because
-it would trigger a lot of false positives)
-- `get`
-
-Sanitizers are SQL sanitizers:
-
-// TODO
-
-The sinks are ...:
-
-// TODO
-
-## [SQL Alchemy/Flask] SQL Injection 2
-
-**// TODO: improve this explanation**
-
-Detects flows from values in the request (provided by flask) into raw database
-functions (using SQL Alchemy). The difference here is that an arbitrary command
-can't be run, because the whole command is not built, but rather arguments for the 
-command are provided
-
-Sources - same as before
-
-Sinks:
-
-- where is `filter` defined?
-- where is `where` defined?
 
 ## [Django/] SQL Injection - raw SQL
 
