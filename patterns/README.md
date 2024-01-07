@@ -2,23 +2,25 @@
 
 Available:
 
-- [x] [Django] SQL Injection
+- [x] [Flask/Django] SQL Injection
 - [x] [Flask/Django] Command Injection
 - [x] [Flask/Django] Path traversal
 - [x] [Flask/Django] Deserialization of untrusted data
-- [x] [Flask] Unvalidated Redirects
+- [x] [Flask/Django] Unvalidated Redirects
 
 
-## [Django] SQL Injection - raw SQL
+## [Flask/Django] SQL Injection
 
-In Django, the request variable doesn't have a fixed name (as in Flask). This
+In Django, the request might be in a variable which doesn't have a fixed name. This
 means, the names that are presented are likely variable names
-(`request`, `req`, `r`, `http_request`, `user_request` will be used)
+(`request`, `req`, `r`, `http_request`, `user_request` will be used as sources).
+In Flask, the request is available in the `request` variable. Values that come
+from this object were also added as sources.
 
 Django uses most of the time an ORM, which means that usually there won't be 
 SQL Injections. However, there are situations where the ORM is not a good fit,
-so Django provides support for executing SQL statements directly, which is using
-`RawSQL`, `raw` and `execute`. Sometimes `handy` might also be used (so `handy`'s
+so Django provides support for executing SQL statements directly (as is usufal in Flask),
+which is using `RawSQL`, `raw` and `execute`. Sometimes `handy` might also be used (so `handy`'s
 database related functions are also considered as sinks). Note another database driver
 that not `pycopg2` might being used (for example `MySQL Connector` - for this driver the
 method to execute the SQL command is the same, so no source is added).
@@ -75,6 +77,8 @@ Were considered as sanitizers (follwing [this](https://cheatsheetseries.owasp.or
 - Regular expressions (`re` module): `match`, `search` and `fullmatch` 
 - Functions from the `urllib.parse` module (both sanitization of user data and
 safe builders for URLs are considered)
+
+The sinks are the redirect functions from both [Flask](https://flask.palletsprojects.com/en/3.0.x/api/#flask.Flask.redirect) and [Django](https://docs.djangoproject.com/en/5.0/topics/http/shortcuts/#redirect).
 
 ---
 

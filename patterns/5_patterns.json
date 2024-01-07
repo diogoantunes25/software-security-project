@@ -1,8 +1,9 @@
 [
         {
-        "vulnerability": "[Django] SQL Injection",
+        "vulnerability": "[Flask/Django] SQL Injection",
         "sources": [
-            "request", "req", "r", "http_request", "user_request"
+            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files",
+            "request", "req", "r", "http_request", "user_request", "get_object_or_404", "aget_object_or_404"
         ],
         "sanitizers": [
             "mogrify", "format",
@@ -18,7 +19,7 @@
         "vulnerability": "[Flask/Django] Command Injection",
         "sources": [
             "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files",
-            "request", "req", "r", "http_request", "user_request"
+            "request", "req", "r", "http_request", "user_request", "get_object_or_404", "aget_object_or_404"
         ],
         "sanitizers": [
             "quote"
@@ -35,7 +36,7 @@
         "vulnerability": "[Flask/Django] Path Traversal",
         "sources": [
             "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files",
-            "request", "req", "r", "http_request", "user_request"
+            "request", "req", "r", "http_request", "user_request", "get_object_or_404", "aget_object_or_404"
         ],
         "sanitizers": [
             "normpath", "commonpath",
@@ -56,7 +57,7 @@
         "vulnerability": "[Flask/Django] Deserialization of untrusted data",
         "sources": [
             "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files",
-            "request", "req", "r", "http_request", "user_request"
+            "request", "req", "r", "http_request", "user_request", "get_object_or_404", "aget_object_or_404"
         ],
         "sanitizers": [
             ""
@@ -67,9 +68,10 @@
         "implicit": "no"
     },
     {
-        "vulnerability": "[Flask] Unvalidated Redirects",
+        "vulnerability": "[Flask/Djgango] Unvalidated Redirects",
         "sources": [
-            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files"
+            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files",
+            "request", "req", "r", "http_request", "user_request", "get_object_or_404", "aget_object_or_404"
         ],
         "sanitizers": [
             "match", "search", "fullmatch",
