@@ -19,16 +19,22 @@ from this object were also added as sources.
 
 Django uses most of the time an ORM, which means that usually there won't be 
 SQL Injections. However, there are situations where the ORM is not a good fit,
-so Django provides support for executing SQL statements directly (as is usufal in Flask),
+so Django provides support for executing SQL statements directly (as is usual in Flask),
 which is using `RawSQL`, `raw` and `execute`. Sometimes `handy` might also be used (so `handy`'s
-database related functions are also considered as sinks). Note another database driver
-that not `pycopg2` might being used (for example `MySQL Connector` - for this driver the
-method to execute the SQL command is the same, so no source is added).
+database related functions are also considered as sinks). Note other database drivers
+(different from `pycopg2` might be used). As an example, we also considered `MySQL Connector`
+and `sqlite3`. For this reason the following sinks are added:
+
+- `MySQL Connector`: (`execute`)
+- `sqlite3`: (`execute`), `executemany`, `execute_script`, `create_function`, `create_aggregate`, `create_window_function`
+
+(`SQLAlchemy`'s method is also `execute`)
 
 The sanitizers considered are `psycopg2.mogrify`, `psycopg2.sql.SQL.format` (when `psycopg2`
-is being used) and `mysql.connection.connector.escape_string` (for `MySQL Connector`).
+is being used) and `mysql.connection.connector.escape_string` (for `MySQL Connector`) (no extra
+sanitizers where found for `sqlite3`).
 
-Other drivers can be considered (check [docs here](https://docs.djangoproject.com/en/5.0/ref/databases/#mariadb-notes)),
+Other drivers can be considered (check [docs here](https://docs.djangoproject.com/en/5.0/ref/databases)),
 but aren't added because it would be analogous and for demonstration purpose
 has no added value.
 
@@ -59,8 +65,7 @@ The sanitizers considered are:
 The sinks considered will be any functions that perform actions based on filepaths:
 - Functions from `shutil` module: `copyfile`, `copymode`, `copystat`, `copy`, `copy2`, `copytree`, `rmtree`, `move`, `disk_usage`, `chown`
 - `open`
-- Functions from `os` module: `chdir`, `access`, `chflags`, `chmod`, `chown`, `chroot`, `lchflags`, `lchmod`, `lchown`, `link`, `listdir`, `lstat`, `mkdir`, `makedirs`, `mkfifo`, `mknod`, `remove`, `removedirs`, `rename`, `renames`, `replace`, `rmdir`, `stat`, `symlink`, `truncate`, `unlink`, `getxattr`, `listxattr`, `removexattr`, `setxattr`
-- Functions from `pathlib` module: `Path`, `PurePath`, `PurePosixPath`, `PosixPath`, `PureWindowsPath`, `WindowsPath`
+- Functions from `os` module: `chdir`, `access`, `chflags`, `chmod`, `chown`, `chroot`, `lchflags`, `lchmod`, `lchown`, `link`, `listdir`, `lstat`, `mkdir`, `makedirs`, `mkfifo`, `mknod`, `remove`, `removedirs`, `rename`, `renames`, `replace`, `rmdir`, `stat`, `symlink`, `truncate`, `unlink`, `getxattr`, `listxattr`, `removexattr`, `setxattr`, `walk`, `readlink`
 
 ## [Flask/pickle] Deserialization of untrusted data
 
@@ -90,7 +95,8 @@ The sinks are the redirect functions from both [Flask](https://flask.palletsproj
 - [`popen2` docs](https://python.readthedocs.io/en/v2.7.2/library/popen2.html#module-popen2)
 - [`handy` database related function docs](https://handy.readthedocs.io/en/latest/db.html)
 - Djangos's [raw queries](https://docs.djangoproject.com/en/dev/topics/db/sql/#executing-raw-queries) and [direct custom SQL](https://docs.djangoproject.com/en/dev/topics/db/sql/#executing-custom-sql)
-- [MySQL driver docs](https://dev.mysql.com/doc/connector-python/en/connector-python-examples.html)
+- [MySQL Connector driver docs](https://dev.mysql.com/doc/connector-python/en/connector-python-examples.html)
+- [sqlite3 driver docs](https://docs.python.org/3/library/sqlite3.html)
 - [`sanitize-filename` package](https://pypi.org/project/sanitize-filename/)
 - [Usage of `os.path.commonpath` to check is path is safe](https://security.openstack.org/guidelines/dg_using-file-paths.html)
 - [`urllib.parse` docs](https://docs.python.org/3/library/urllib.parse.html#module-urllib.parse)

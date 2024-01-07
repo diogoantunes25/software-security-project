@@ -11,7 +11,8 @@
         ],
         "sinks": [
             "RawSQL", "raw", "execute", "callproc",
-            "fetch_all", "fetch_row", "fetch_col", "fetch_val", "do_sql", "fetch_dicts", "fetch_dict", "fetch_named", "fetch_named_row"
+            "fetch_all", "fetch_row", "fetch_col", "fetch_val", "do_sql", "fetch_dicts", "fetch_dict", "fetch_named", "fetch_named_row",
+            "executemany", "execute_script", "create_function", "create_aggregate", "create_window_function"
         ],
         "implicit": "yes"
     },
@@ -47,9 +48,8 @@
         "sinks": [
             "copyfile", "copymode", "copystat", "copy", "copy2", "copytree", "rmtree", "move", "disk_usage", "chown", 
             "open",
-            "chdir", "access", "chflags", "chmod", "chown", "chroot", "lchflags", "lchmod", "lchown", "link", "listdir", "lstat", "mkdir", "makedirs", "mkfifo", "mknod", "remove", "removedirs", "rename", "renames", "replace", "rmdir", "stat", "symlink", "truncate", "unlink", "getxattr", "listxattr", "removexattr", "setxattr",
-            "exists", "lexists", "getatime", "getmtime", "getctime", "getsize",
-            "Path", "PurePath", "PurePosixPath", "PosixPath", "PureWindowsPath", "WindowsPath"
+            "chdir", "access", "chflags", "chmod", "chown", "chroot", "lchflags", "lchmod", "lchown", "link", "listdir", "lstat", "mkdir", "makedirs", "mkfifo", "mknod", "remove", "removedirs", "rename", "renames", "replace", "rmdir", "stat", "symlink", "truncate", "unlink", "getxattr", "listxattr", "removexattr", "setxattr", "walk", "readlink",
+            "exists", "lexists", "getatime", "getmtime", "getctime", "getsize"
         ],
         "implicit": "no"
     },
