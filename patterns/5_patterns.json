@@ -1,31 +1,5 @@
 [
-    {
-        "vulnerability": "[SQLAlchemy/Flask] SQL Injection 1",
-        "sources": [
-            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files"
-        ],
-        "sanitizers": [
-            ""
-        ],
-        "sinks": [
-            "execute", "from_statement", "text"
-        ],
-        "implicit": "yes"
-    },
-    {
-        "vulnerability": "[SQLAlchemy/Flask] SQL Injection 2",
-        "sources": [
-            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files"
-        ],
-        "sanitizers": [
-            ""
-        ],
-        "sinks": [
-            "filter", "where"
-        ],
-        "implicit": "yes"
-    },
-    {
+        {
         "vulnerability": "[Django] SQL Injection",
         "sources": [
             "request", "req", "r", "http_request", "user_request"
