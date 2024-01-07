@@ -92,7 +92,6 @@ The sinks considered will be any functions that perform actions based on filepat
 - Functions from `shutil` module: `copyfile`, `copymode`, `copystat`, `copy`, `copy2`, `copytree`, `rmtree`, `move`, `disk_usage`, `chown`
 - `open`
 - Functions from `os` module: `chdir`, `access`, `chflags`, `chmod`, `chown`, `chroot`, `lchflags`, `lchmod`, `lchown`, `link`, `listdir`, `lstat`, `mkdir`, `makedirs`, `mkfifo`, `mknod`, `remove`, `removedirs`, `rename`, `renames`, `replace`, `rmdir`, `stat`, `symlink`, `truncate`, `unlink`, `getxattr`, `listxattr`, `removexattr`, `setxattr`
-- Functions from `os.path` module: `exists`, `lexists`, `getatime`, `getmtime`, `getctime`, `getsize`
 - Functions from `pathlib` module: `Path`, `PurePath`, `PurePosixPath`, `PosixPath`, `PureWindowsPath`, `WindowsPath`
 
 ## [Flask/pickle] Deserialization of untrusted data
@@ -103,10 +102,12 @@ No sanitizers were found for this problem.
 
 ## [Flask/pickle] Unvalidated redirects
 
-Here, the entire `request` object is considered as a source. However, this 
-would result in most redirects being flagged with a vulnerability.
+Detects flows from the user provided data to the URL provided for redirects.
 
-// TODO: solve problem of too many positives
+Were considered as sanitizers (follwing [this](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html):
+
+- Regular expressions (`re` module): `match`, `search` and `fullmatch` 
+- `urlparse`
 
 ---
 

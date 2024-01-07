@@ -94,10 +94,11 @@
     {
         "vulnerability": "[Flask] Unvalidated Redirects",
         "sources": [
-            "request"
+            "get", "form", "get_data", "get_json", "cookies", "data", "json", "values", "view_args", "files"
         ],
         "sanitizers": [
-            ""
+            "match", "search", "fullmatch",
+            "urlparse"
         ],
         "sinks": [
             "redirect"
