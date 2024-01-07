@@ -72,7 +72,7 @@
         ],
         "sanitizers": [
             "match", "search", "fullmatch",
-            "urlparse"
+            "urlparse", "urlunparse", "urlsplit", "urlunsplit", "urljoin", "urldefrag"
         ],
         "sinks": [
             "redirect"

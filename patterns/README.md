@@ -9,7 +9,7 @@ Available:
 - [x] [Flask] Unvalidated Redirects
 
 
-## [Django/] SQL Injection - raw SQL
+## [Django] SQL Injection - raw SQL
 
 In Django, the request variable doesn't have a fixed name (as in Flask). This
 means, the names that are presented are likely variable names
@@ -69,7 +69,8 @@ Detects flows from the user provided data to the URL provided for redirects.
 Were considered as sanitizers (follwing [this](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html)):
 
 - Regular expressions (`re` module): `match`, `search` and `fullmatch` 
-- `urlparse`
+- Functions from the `urllib.parse` module (both sanitization of user data and
+safe builders for URLs are considered)
 
 ---
 
@@ -84,3 +85,4 @@ Were considered as sanitizers (follwing [this](https://cheatsheetseries.owasp.or
 - [MySQL driver docs](https://dev.mysql.com/doc/connector-python/en/connector-python-examples.html)
 - [`sanitize-filename` package](https://pypi.org/project/sanitize-filename/)
 - [Usage of `os.path.commonpath` to check is path is safe](https://security.openstack.org/guidelines/dg_using-file-paths.html)
+- [`urllib.parse` docs](https://docs.python.org/3/library/urllib.parse.html#module-urllib.parse)
