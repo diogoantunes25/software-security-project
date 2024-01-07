@@ -4,7 +4,7 @@ Available:
 
 - [ ] [SQLAlchemy/Flask] SQL Injection 1
 - [ ] [SQLAlchemy/Flask] SQL Injection 2
-- [ ] [Django] SQL Injection
+- [x] [Django] SQL Injection
 - [x] [Flask/Django] Command Injection
 - [ ] [Flask/Django] Path traversal
 - [x] [Flask/Django] Deserialization of untrusted data
@@ -50,13 +50,19 @@ Sinks:
 ## [Django/] SQL Injection - raw SQL
 
 In Django, the request variable doesn't have a fixed name (as in Flask). This
-means, the name that are presented are the likely variable name (`request`, `req`, `r`, `http_request`, `user_request` will be used)
+means, the names that are presented are likely variable names
+(`request`, `req`, `r`, `http_request`, `user_request` will be used)
 
 Django uses most of the time an ORM, which means that usually there won't be 
 SQL Injections. However, there are situations where the ORM is not a good fit,
 so Django provides support for executing SQL statements directly, which is using
 `RawSQL`, `raw` and `execute`. Sometimes `handy` might also be used (so `handy`'s
-database related functions are also considered as sinks)
+database related functions are also considered as sinks). Note another database driver
+that not `pycopg2` might being used (for example `mysql` - for this driver the
+method to execute the SQL command is the same, so no source is added).
+
+The sanitizers considered are `psycopg2.mogrify`, `psycopg2.sql.SQL.format` (when `psycopg2`
+is being used) and `mysql.connection.connector.escape_string` (for `mysql`).
 
 ## [Flask] Command Injection
 
@@ -112,3 +118,4 @@ would result in most redirects being flagged with a vulnerability.
 - [`popen2` docs](https://python.readthedocs.io/en/v2.7.2/library/popen2.html#module-popen2)
 - [`handy` database related function docs](https://handy.readthedocs.io/en/latest/db.html)
 - Djangos's [raw queries](https://docs.djangoproject.com/en/dev/topics/db/sql/#executing-raw-queries) and [direct custom SQL](https://docs.djangoproject.com/en/dev/topics/db/sql/#executing-custom-sql)
+- [MySQL driver docs](https://dev.mysql.com/doc/connector-python/en/connector-python-examples.html)
