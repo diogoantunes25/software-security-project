@@ -66,7 +66,7 @@ No sanitizers were found for this problem.
 
 Detects flows from the user provided data to the URL provided for redirects.
 
-Were considered as sanitizers (follwing [this](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html):
+Were considered as sanitizers (follwing [this](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html)):
 
 - Regular expressions (`re` module): `match`, `search` and `fullmatch` 
 - `urlparse`
@@ -76,7 +76,6 @@ Were considered as sanitizers (follwing [this](https://cheatsheetseries.owasp.or
 ## Useful links
 
 - [Flask API](https://flask.palletsprojects.com/en/3.0.x/api/)
-- [SQLAlchmey - SQL Statements and Expressions API](https://docs.sqlalchemy.org/en/20/core/expression_api.html)
 - [`subprocess` docs](https://docs.python.org/3/library/subprocess.html#module-subprocess)
 - [`os` docs](https://docs.python.org/3/library/os.html#)
 - [`popen2` docs](https://python.readthedocs.io/en/v2.7.2/library/popen2.html#module-popen2)
