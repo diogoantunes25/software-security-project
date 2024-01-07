@@ -62,7 +62,7 @@ The sinks are taken from the `pickle` python module.
 
 No sanitizers were found for this problem.
 
-## [Flask/pickle] Unvalidated redirects
+## [Flask] Unvalidated redirects
 
 Detects flows from the user provided data to the URL provided for redirects.
 
