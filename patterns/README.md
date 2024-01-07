@@ -93,7 +93,7 @@ The sinks considered will be any functions that perform actions based on filepat
 - `open`
 - Functions from `os` module: `chdir`, `access`, `chflags`, `chmod`, `chown`, `chroot`, `lchflags`, `lchmod`, `lchown`, `link`, `listdir`, `lstat`, `mkdir`, `makedirs`, `mkfifo`, `mknod`, `remove`, `removedirs`, `rename`, `renames`, `replace`, `rmdir`, `stat`, `symlink`, `truncate`, `unlink`, `getxattr`, `listxattr`, `removexattr`, `setxattr`
 - Functions from `os.path` module: `exists`, `lexists`, `getatime`, `getmtime`, `getctime`, `getsize`
-- Functions from `pathlib` module: `Path`, `PurePath`, `PurePosixPath`, `PosixPath`, `PureWindowsPath`, `WindowsPath` // TODO: might make sense to add more
+- Functions from `pathlib` module: `Path`, `PurePath`, `PurePosixPath`, `PosixPath`, `PureWindowsPath`, `WindowsPath`
 
 ## [Flask/pickle] Deserialization of untrusted data
 
