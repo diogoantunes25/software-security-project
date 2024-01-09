@@ -16,6 +16,9 @@ class IFVisitor():
         # Context multilabel used for conditionals and loops
         self.contexts = [MultiLabel({})]
 
+        # Wheter we are on a stopping loop
+        self.stop = False
+
     def current_context(self):
         return self.contexts[-1].clone()
 
@@ -95,6 +98,12 @@ class IFVisitor():
         elif type(node) == ast.AugAssign:
             return self.visit_aug_assign(node, policy, mtlb, vulns)
 
+        elif type(node) == ast.Continue:
+            return self.visit_continue(node, policy, mtlb, vulns)
+
+        elif type(node) == ast.Break:
+            return self.visit_break(node, policy, mtlb, vulns)
+
         else:
             raise ValueError(
                 f"Unknown (or Unsupported) AST node - {type(node).__name__}")
@@ -104,6 +113,8 @@ class IFVisitor():
                        vulns: Vulnerability) -> MultiLabelling:
 
         for stmt in nodes:
+            if self.stop: return mtlb
+
             value = self.visit(stmt, policy, mtlb, vulns)
             if type(value) == MultiLabelling:
                 mtlb = value
@@ -234,10 +245,18 @@ class IFVisitor():
         self.contexts.append(condmlb.clone().filter_implicit(policy))
 
         taken = self.visit_multiple(node.body, policy, mtlb, vulns)
+
+        left_stop = self.stop
+        self.stop = False
+
         not_taken = mtlb
         if node.orelse:
             logging.debug("visiting orelse node")
             not_taken = self.visit_multiple(node.orelse, policy, mtlb, vulns)
+
+        right_stop = self.stop
+
+        self.stop = left_stop and right_stop
 
         self.contexts.pop()
 
@@ -357,6 +376,7 @@ class IFVisitor():
             old_mtlb = mtlb.clone()
 
             taken = self.visit_multiple(node.body, policy, mtlb, vulns)
+            self.stop = False
             # TODO: handle orelse (a bit akward in while context)
             not_taken = mtlb
 
@@ -490,3 +510,13 @@ class IFVisitor():
             f"Converted {ast.dump(node)} into {ast.dump(while_node)}")
 
         return self.visit(while_node, policy, mtlb, vulns)
+
+    def visit_continue(self, node: ast.For, policy: Policy, mtlb: MultiLabelling,
+                  vulns: Vulnerability) -> MultiLabelling:
+        self.stop = True
+        return mtlb
+
+    def visit_break(self, node: ast.For, policy: Policy, mtlb: MultiLabelling,
+                  vulns: Vulnerability) -> MultiLabelling:
+        self.stop = True
+        return mtlb
